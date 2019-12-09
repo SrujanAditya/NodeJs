@@ -1,0 +1,1 @@
+[{"book":"The Compound Elite","author":"Daman handy","amount":5,"price":20},{"book":"The 7 habits","author":"Stephen","amount":4,"price":23.48},{"book":"The Miracle Morning","author":"Hal Elnod","amount":10,"price":21.38},{"book":"Influence","author":"Robert B. Caladin","amount":2,"price":23.45},{"book":"The One thing","author":"Gary Page","amount":1,"price":11.18}]

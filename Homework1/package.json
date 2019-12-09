@@ -6,11 +6,21 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "task1": "node task1",
-    "task2": "node task2"
+    "task2": "node task2-fullLoad",
+    "task2-1": "node task2-pipeline",
+    "babel-task1": "babel-node -- task1",
+    "babel-task2": "babel-node -- task2-fullLoad-babel",
+    "babel-task2-1": "babel-node -- task2-pipeline-babel"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "csvtojson": "^2.0.10"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/node": "^7.7.4",
+    "@babel/preset-env": "^7.7.6"
   }
 }
