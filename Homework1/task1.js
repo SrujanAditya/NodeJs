@@ -6,3 +6,7 @@ process.stdin.on('readable', () => {
     process.stdout.write(`${chunk.split('').reverse().join('')}\n`);
   }
 });
+
+process.stdin.on('end', () => {
+  process.stdout.write('end');
+});
