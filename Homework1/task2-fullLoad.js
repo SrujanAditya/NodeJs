@@ -1,24 +1,29 @@
-const csvFilePath = 'data.csv';
 const fs = require('fs');
 const csv = require('csvtojson');
-csv({
-	colParser:{
-		"column1":"string",
-        "column2":"string",
-        "column3":"number",
-        "column4":"number"
-	},
-	checkType:true
-})
-.fromFile(csvFilePath)
-.then( (jsonObj)=>{
-	 fs.writeFile('data.txt',JSON.stringify(jsonObj),(err,result) =>{
-         if(err) {
-             console.log(err);
-         } else {
-             console.log(result);
-         }
-     });
-})
+const csvFilePath = 'data.csv';
 
-csv();
+async function convertCsvToJson() {
+    return jsonArray = await csv({
+        colParser: {
+            "column1": "string",
+            "column2": "string",
+            "column3": "number",
+            "column4": "number"
+        },
+        checkType: true
+    }).fromFile(csvFilePath);
+}
+
+convertCsvToJson().then(data => {
+    result = '';
+    data.forEach(obj => {
+       result += JSON.stringify(obj) + '\n';
+    });
+    fs.writeFile('data.txt', result, (err) => {
+        if (err) {
+            console.log(err);
+        }
+    })
+}).catch(err => {
+    console.log("FILE DOES NOT EXIST", err);
+});
