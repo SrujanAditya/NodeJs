@@ -1,7 +1,9 @@
 const fs = require('fs');
 const csv = require('csvtojson');
-const csvFilePath = 'data.csv';
+const { promisify } = require("util");
 
+const csvFilePath = 'data.csv';
+const writeFile = promisify(fs.writeFile);
 async function convertCsvToJson() {
     return jsonArray = await csv({
         colParser: {
@@ -14,16 +16,19 @@ async function convertCsvToJson() {
     }).fromFile(csvFilePath);
 }
 
-convertCsvToJson().then(data => {
-    result = '';
-    data.forEach(obj => {
-       result += JSON.stringify(obj) + '\n';
-    });
-    fs.writeFile('data.txt', result, (err) => {
-        if (err) {
-            console.log(err);
-        }
-    })
-}).catch(err => {
-    console.log("FILE DOES NOT EXIST", err);
-});
+async function writeData() {
+    try {
+        result = '';
+        const data = await convertCsvToJson();
+        data.forEach(obj => {
+         result += JSON.stringify(obj) + '\n';
+      });
+      await writeFile('data.txt', result);
+    } catch(err) {
+        console.log("FILE DOES NOT EXIST", err);
+    }
+}
+
+writeData().catch(err => {
+    console.log(err);
+})
