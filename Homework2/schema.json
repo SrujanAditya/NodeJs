@@ -1,0 +1,26 @@
+{
+    "title" : "new-user",
+    "description" : "properties required for creating new user",
+    "type": "object",
+    "properties" : {
+        "id" :  {
+            "type" : "string"
+        },
+        "login" : {
+            "format": "email"
+        },
+        "password" : {
+            "type": "string",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9]+"
+        },
+        "age" : {
+            "type" : "number",
+            "minimum": 4,
+            "maximum": 130
+        },
+        "isDeleted" : {
+            "type" : "boolean"
+        }
+    },
+    "required" : ["id", "login", "password", "age", "isDeleted"]
+}
