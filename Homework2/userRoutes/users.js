@@ -2,7 +2,6 @@ const express = require('express');
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
-var session = require('express-session');
 const userRouter = express.Router();
 
 const userSchema = Joi.object().keys({
