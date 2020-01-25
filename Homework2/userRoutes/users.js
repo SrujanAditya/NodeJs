@@ -11,7 +11,7 @@ userRouter.use(session({
     saveUninitialized: false,
     secret: 'ssh!quiet,it\'asecret!',
     cookie: {
-        maxAge: 10000,
+        maxAge: 1000*60*60,
         secure: true,
         sameSite: true
     }
