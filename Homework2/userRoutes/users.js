@@ -2,7 +2,20 @@ const express = require('express');
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
+const session = require('express-session');
 const userRouter = express.Router();
+
+userRouter.use(session({
+    name: 'user',
+    resave: false,
+    saveUninitialized: false,
+    secret: 'ssh!quiet,it\'asecret!',
+    cookie: {
+        maxAge: 10000,
+        secure: true,
+        sameSite: true
+    }
+}))
 
 const userSchema = Joi.object().keys({
     id: Joi.string().required(),
@@ -49,7 +62,8 @@ const validateSchema = (schema) => {
 }
 
 const checkAccessPermission = (req, res, next) => {
-    if (!access_token) {
+    req.session.access_token = access_token;
+    if (!req.session.access_token) {
         res.status(403).json({
             message: "Unauthorised operation"
         });
@@ -64,6 +78,7 @@ userRouter.post('/login', (req, res) => {
         bcrypt.compare(req.body.password, userExist.password).then(result => {
             if (result) {
                 access_token = userExist.password;
+                req.session.access_token = access_token;
                 res.status(200).json({
                     message: "Login Successfull",
                     access_token: userExist.password
