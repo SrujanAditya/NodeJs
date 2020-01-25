@@ -2,16 +2,24 @@ const express = require('express');
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
+var session = require('express-session');
 const userRouter = express.Router();
 
 const userSchema = Joi.object().keys({
     id: Joi.string().required(),
-    login: Joi.string().email().required(),
+    login: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
     password: Joi.string().alphanum().required(),
     age: Joi.number().integer().min(4).max(130).required()
 });
 
-let users = [];
+let users = [{
+    "id": "000",
+    "login": "admin@gmail.com",
+    "password": "$2b$10$Ajb0x8QNrZem7/eOkXh9M.Xj1P1CbZPbgHuCt4K.hSoJ01Mm.ALBm",
+    "age": 22
+}];
+
+let access_token;
 
 const saltRounds = 10;
 
@@ -41,11 +49,22 @@ const validateSchema = (schema) => {
     }
 }
 
+const checkAccessPermission = (req, res, next) => {
+    if (!access_token) {
+        res.status(403).json({
+            message: "Unauthorised operation"
+        });
+    } else {
+        next();
+    }
+}
+
 userRouter.post('/login', (req, res) => {
     const userExist = _.find(users, { login: req.body.login });
     if (userExist) {
         bcrypt.compare(req.body.password, userExist.password).then(result => {
             if (result) {
+                access_token = userExist.password;
                 res.status(200).json({
                     message: "Login Successfull",
                     access_token: userExist.password
@@ -63,11 +82,11 @@ userRouter.post('/login', (req, res) => {
     }
 });
 
-userRouter.get('/users', (req, res) => {
+userRouter.get('/users', checkAccessPermission, (req, res) => {
     res.json(users);
 });
 
-userRouter.get('/users/:id', (req, res) => {
+userRouter.get('/users/:id', checkAccessPermission, (req, res) => {
     const user = _.find(users, { id: req.params.id });
     if (user) {
         res.status(200).json(user);
@@ -78,7 +97,7 @@ userRouter.get('/users/:id', (req, res) => {
     }
 });
 
-userRouter.put('/users/:id', validateSchema(userSchema), (req, res) => {
+userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, (req, res) => {
     const userExist = _.find(users, { id: req.params.id });
     if (userExist) {
         bcrypt.hash(req.body.password, saltRounds).then(hash => {
@@ -104,7 +123,7 @@ userRouter.put('/users/:id', validateSchema(userSchema), (req, res) => {
     }
 });
 
-userRouter.post('/addUser', validateSchema(userSchema), (req, res) => {
+userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, (req, res) => {
     const userExist = _.find(users, { id: req.body.id });
     if (!userExist) {
         bcrypt.hash(req.body.password, saltRounds).then(hash => {
@@ -123,11 +142,11 @@ userRouter.post('/addUser', validateSchema(userSchema), (req, res) => {
     } else {
         res.status(409).json({
             message: `User with id ${req.body.id} already exist`
-        })
+        });
     }
 });
 
-userRouter.delete('/users/:id', (req, res) => {
+userRouter.delete('/users/:id', checkAccessPermission, (req, res) => {
     let userExist = _.find(users, { id: req.params.id });
     if (userExist) {
         users.forEach(user => {
@@ -146,7 +165,7 @@ userRouter.delete('/users/:id', (req, res) => {
     }
 });
 
-userRouter.get('/autoSuggest', async (req, res) => {
+userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
     const searchString = req.query.search;
     const limit = req.query.limit;
     const result = await getAutoSuggestUsers(searchString, limit);
