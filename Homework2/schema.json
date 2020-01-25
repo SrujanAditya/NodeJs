@@ -17,10 +17,7 @@
             "type" : "number",
             "minimum": 4,
             "maximum": 130
-        },
-        "isDeleted" : {
-            "type" : "boolean"
         }
     },
-    "required" : ["id", "login", "password", "age", "isDeleted"]
+    "required" : ["id", "login", "password", "age"]
 }

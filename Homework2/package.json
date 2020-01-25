@@ -11,9 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ajv": "^6.10.2",
+    "bcrypt": "^3.0.7",
     "express": "^4.17.1",
-    "underscore": "^1.9.2",
-    "ajv": "^6.10.2"
+    "underscore": "^1.9.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

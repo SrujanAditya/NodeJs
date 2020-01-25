@@ -1,11 +1,12 @@
 const express = require('express');
 const _ = require('underscore');
+const bcrypt = require('bcrypt');
 const userRouter = express.Router();
 
 const Ajv = require('ajv');
 const ajv = new Ajv({ allErrors: true, removeAdditional: 'all' });
 const userSchema = require('../schema.json');
-ajv.addSchema(userSchema,'new-user');
+ajv.addSchema(userSchema, 'new-user');
 
 let users = [
     {
@@ -37,10 +38,9 @@ let users = [
     }
 ];
 
-
+const saltRounds = 10;
 
 const errorResponse = (schemaErrors) => {
-    console.log(schemaErrors);
     let errors = schemaErrors.map((error) => {
         return {
             path: error.dataPath,
@@ -53,10 +53,9 @@ const errorResponse = (schemaErrors) => {
     }
 }
 const validateSchema = (schemaName) => {
-    return (req,res,next) => {
-        let isValid = ajv.validate(schemaName,req.body);
-        console.log(isValid);
-        if(!isValid) {
+    return (req, res, next) => {
+        let isValid = ajv.validate(schemaName, req.body);
+        if (!isValid) {
             res.status(400).json(errorResponse(ajv.errors));
         } else {
             next();
@@ -82,19 +81,22 @@ userRouter.get('/users/:id', (req, res) => {
 userRouter.put('/users/:id', validateSchema(userSchema), (req, res) => {
     const userExist = _.find(users, { id: req.params.id });
     if (userExist) {
-        users.forEach(user => {
-            if (user.id === req.body.id) {
-                user.id = req.body.id;
-                user.login = req.body.login;
-                user.password = req.body.password;
-                user.age = req.body.age;
-                user.isDeleted = req.body.isDeleted;
-            }
-            return user;
+        bcrypt.hash(req.body.password, saltRounds).then(hash => {
+            users.forEach(user => {
+                if (user.id === req.body.id) {
+                    user.id = req.body.id;
+                    user.login = req.body.login;
+                    user.password = hash;
+                    user.age = req.body.age;
+                    user.isDeleted = false;
+                }
+                return user;
+            });
+            res.status(200).json({
+                message: `User with id ${req.params.id} updated successfully`
+            })
         });
-        res.status(200).json({
-            message: `User with id ${req.params.id} updated successfully`
-        })
+
     } else {
         res.status(404).json({
             message: `User with id ${req.params.id} not found`
@@ -103,22 +105,24 @@ userRouter.put('/users/:id', validateSchema(userSchema), (req, res) => {
 });
 
 userRouter.post('/addUser', validateSchema(userSchema), (req, res) => {
-    const user = {
-        id: req.body.id,
-        login: req.body.login,
-        password: req.body.password,
-        age: req.body.age,
-        isDeleted: req.body.isDeleted
-    };
     const userExist = _.find(users, { id: req.body.id });
     if (!userExist) {
-        users.push(user);
-        res.status(200).json({
-            message: `User with id ${req.body.id} created successfully`
-        })
+        bcrypt.hash(req.body.password, saltRounds).then(hash => {
+            const user = {
+                id: req.body.id,
+                login: req.body.login,
+                password: hash,
+                age: req.body.age,
+                isDeleted: false
+            };
+            users.push(user);
+            res.status(200).json({
+                message: `User with id ${req.body.id} created successfully`
+            });
+        });
     } else {
-        res.status(404).json({
-            message: `User with id ${req.params.id} already exist`
+        res.status(409).json({
+            message: `User with id ${req.body.id} already exist`
         })
     }
 });
@@ -136,7 +140,7 @@ userRouter.delete('/users/:id', (req, res) => {
             message: "User deleted successfully"
         })
     } else {
-        res.json({
+        res.status(404).json({
             message: `User with id ${req.params.id} not found`
         })
     }
