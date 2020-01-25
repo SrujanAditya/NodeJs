@@ -11,35 +11,7 @@ const userSchema = Joi.object().keys({
     age: Joi.number().integer().min(4).max(130).required()
 });
 
-let users = [
-    {
-        id: '001',
-        login: 'xyz4@abxy.com',
-        password: '@@#gvk_!s&p',
-        age: 22,
-        isDeleted: false
-    },
-    {
-        id: '002',
-        login: 'xyz3@abxy.com',
-        password: '@@#gvk_!s&p',
-        age: 22,
-        isDeleted: false
-    },
-    {
-        id: '003',
-        login: 'xyz2@abxy.com',
-        password: '@@#gvk_!s&p',
-        age: 22,
-        isDeleted: false
-    }, {
-        id: '004',
-        login: 'xyz1@abxy.com',
-        password: '@@#gvk_!s&p',
-        age: 22,
-        isDeleted: false
-    }
-];
+let users = [];
 
 const saltRounds = 10;
 
@@ -57,7 +29,7 @@ const errorResponse = (schemaErrors) => {
 }
 const validateSchema = (schema) => {
     return (req, res, next) => {
-        const { error } = schema.validate(req.body,{
+        const { error } = schema.validate(req.body, {
             abortEarly: false,
             allowUnknown: false
         })
@@ -68,6 +40,28 @@ const validateSchema = (schema) => {
         }
     }
 }
+
+userRouter.post('/login', (req, res) => {
+    const userExist = _.find(users, { login: req.body.login });
+    if (userExist) {
+        bcrypt.compare(req.body.password, userExist.password).then(result => {
+            if (result) {
+                res.status(200).json({
+                    message: "Login Successfull",
+                    access_token: userExist.password
+                });
+            } else {
+                res.status(401).json({
+                    message: "Invalid Login id and password entered"
+                });
+            }
+        });
+    } else {
+        res.status(401).json({
+            message: "Invalid Login id and password entered"
+        });
+    }
+});
 
 userRouter.get('/users', (req, res) => {
     res.json(users);
