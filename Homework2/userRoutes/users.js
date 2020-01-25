@@ -1,12 +1,15 @@
 const express = require('express');
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
+const Joi = require('joi');
 const userRouter = express.Router();
 
-const Ajv = require('ajv');
-const ajv = new Ajv({ allErrors: true, removeAdditional: 'all' });
-const userSchema = require('../schema.json');
-ajv.addSchema(userSchema, 'new-user');
+const userSchema = Joi.object().keys({
+    id: Joi.string().required(),
+    login: Joi.string().email().required(),
+    password: Joi.string().alphanum().required(),
+    age: Joi.number().integer().min(4).max(130).required()
+});
 
 let users = [
     {
@@ -49,14 +52,17 @@ const errorResponse = (schemaErrors) => {
     });
     return {
         status: 'failed',
-        errors: errors
+        errors
     }
 }
-const validateSchema = (schemaName) => {
+const validateSchema = (schema) => {
     return (req, res, next) => {
-        let isValid = ajv.validate(schemaName, req.body);
-        if (!isValid) {
-            res.status(400).json(errorResponse(ajv.errors));
+        const { error } = schema.validate(req.body,{
+            abortEarly: false,
+            allowUnknown: false
+        })
+        if (error && error.isJoi) {
+            res.status(400).json(errorResponse(error.details));
         } else {
             next();
         }
