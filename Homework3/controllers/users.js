@@ -2,6 +2,7 @@ const express = require('express');
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
+
 const userRouter = express.Router();
 
 const userSchema = Joi.object().keys({
@@ -11,10 +12,12 @@ const userSchema = Joi.object().keys({
     age: Joi.number().integer().min(4).max(130).required()
 });
 
+
+
 let users = [{
     "id": "000",
     "login": "admin@gmail.com",
-    "password": "$2b$10$Ajb0x8QNrZem7/eOkXh9M.Xj1P1CbZPbgHuCt4K.hSoJ01Mm.ALBm",
+    "password": "$2b$10$wQ9iytzxUb/2QnVmOBJ3WuN9bsVgvkqG7nnoqtP5peSpJE1eTIg8y",
     "age": 22
 }];
 
