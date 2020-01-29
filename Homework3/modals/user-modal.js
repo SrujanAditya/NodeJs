@@ -1,10 +1,11 @@
 const { connection } = require('../connection/sequelize-connection');
 const Sequelize = require('sequelize');
 
-module.exports.USER_MODAL = connection.define('user', {
+const USER_MODAL = connection.define('user', {
     id: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false,
+        primaryKey: true
     },
     login: {
         type: Sequelize.STRING,
@@ -22,4 +23,12 @@ module.exports.USER_MODAL = connection.define('user', {
         type: Sequelize.BOOLEAN,
         allowNull: false
     }
+}, {
+    timestamps: false,
+    freezeTableName: true, // Model tableName will be the same as the model name
+    tableName: 'user'
 });
+
+module.exports = {
+    userModal:USER_MODAL
+}
