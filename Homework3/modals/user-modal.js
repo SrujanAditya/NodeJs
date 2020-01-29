@@ -1,6 +1,7 @@
+const { connection } = require('../connection/sequelize-connection');
 const Sequelize = require('sequelize');
 
-export const USER_MODAL = Sequelize.define('user', {
+module.exports.USER_MODAL = connection.define('user', {
     id: {
         type: Sequelize.STRING,
         allowNull:false
