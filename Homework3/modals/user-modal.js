@@ -1,5 +1,5 @@
-const { connection } = require('../connection/sequelize-connection');
 const Sequelize = require('sequelize');
+const connection = require('../connection/sequelize-connection');
 
 const USER_MODAL = connection.define('user', {
     id: {

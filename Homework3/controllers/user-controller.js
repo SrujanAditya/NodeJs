@@ -1,19 +1,10 @@
 const express = require('express');
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
-const Joi = require('joi');
-// const {createUser} = require('../data-access/user-data-access');
-
+const userSchema = require('../schema/user-schema');
+const validateSchema = require('../validations/user-validation');
+const createUser = require('../data-access/user-data-access');
 const userRouter = express.Router();
-
-const userSchema = Joi.object().keys({
-    id: Joi.string().required(),
-    login: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
-    password: Joi.string().alphanum().required(),
-    age: Joi.number().integer().min(4).max(130).required()
-});
-
-
 
 let users = [{
     "id": "000",
@@ -26,32 +17,6 @@ let access_token;
 
 const saltRounds = 10;
 
-const errorResponse = (schemaErrors) => {
-    let errors = schemaErrors.map((error) => {
-        return {
-            path: error.dataPath,
-            message: error.message
-        }
-    });
-    return {
-        status: 'failed',
-        errors
-    }
-}
-const validateSchema = (schema) => {
-    return (req, res, next) => {
-        const { error } = schema.validate(req.body, {
-            abortEarly: false,
-            allowUnknown: false
-        })
-        if (error && error.isJoi) {
-            res.status(400).json(errorResponse(error.details));
-        } else {
-            next();
-        }
-    }
-}
-
 const checkAccessPermission = (req, res, next) => {
     if (!access_token) {
         res.status(403).json({
@@ -63,34 +28,37 @@ const checkAccessPermission = (req, res, next) => {
 }
 
 userRouter.post('/login', (req, res) => {
-    const userExist = _.find(users, { login: req.body.login });
-    if (userExist) {
-        bcrypt.compare(req.body.password, userExist.password).then(result => {
-            if (result) {
-                access_token = userExist.password;
-                res.status(200).json({
-                    message: "Login Successfull",
-                    access_token: userExist.password
-                });
-            } else {
-                res.status(401).json({
-                    message: "Invalid Login id and password entered"
-                });
-            }
-        });
-    } else {
-        res.status(401).json({
-            message: "Invalid Login id and password entered"
-        });
-    }
-    // createUser().then(users => {
-    //     if(users) {
-    //         console.log("created user:",users);
-    //         res.send(users);
-    //     } else {
-    //         res.status(400).send('Error in insert new record');
-    //     }
-    // })
+    // const userExist = _.find(users, { login: req.body.login });
+    // if (userExist) {
+    //     bcrypt.compare(req.body.password, userExist.password).then(result => {
+    //         if (result) {
+    //             access_token = userExist.password;
+    //             res.status(200).json({
+    //                 message: "Login Successfull",
+    //                 access_token: userExist.password
+    //             });
+    //         } else {
+    //             res.status(401).json({
+    //                 message: "Invalid Login id and password entered"
+    //             });
+    //         }
+    //     });
+    // } else {
+    //     res.status(401).json({
+    //         message: "Invalid Login id and password entered"
+    //     });
+    // }
+    createUser().then(users => {
+        if (users) {
+            res.status(200).json({
+                message: "Login Successfull",
+            });
+        } else {
+            res.status(401).json({
+                message: "Invalid Login id and password entered"
+            });
+        }
+    })
 });
 
 userRouter.get('/users', checkAccessPermission, (req, res) => {
