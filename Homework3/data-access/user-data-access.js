@@ -1,4 +1,3 @@
-const connection = require('../connection/sequelize-connection');
 const { userModal } = require('../modals/user-modal');
 
 const getUsers = async () => {
@@ -11,4 +10,4 @@ const getUserById = async (id) => {
     return await userModal.findByPk(id)
 }
 
-module.exports = { getUsers, createUser,getUserById };
+module.exports = { getUsers, createUser, getUserById };
