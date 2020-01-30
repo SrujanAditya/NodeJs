@@ -1,13 +1,14 @@
+const connection = require('../connection/sequelize-connection');
 const { userModal } = require('../modals/user-modal');
 
-const createUser = () => {
-    return userModal.create({
-        id: "000",
-        login: "admin@gmail.com",
-        password: "$2b$10$wQ9iytzxUb/2QnVmOBJ3WuN9bsVgvkqG7nnoqtP5peSpJE1eTIg8y",
-        age: 22,
-        isDeleted: false
-    });
+const getUsers = async () => {
+    return await userModal.findAll();
+}
+const createUser = async (user) => {
+    return await userModal.create(user);
+}
+const getUserById = async (id) => {
+    return await userModal.findByPk(id)
 }
 
-module.exports = createUser;
+module.exports = { getUsers, createUser,getUserById };
