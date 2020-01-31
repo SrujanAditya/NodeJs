@@ -3,7 +3,8 @@ const _ = require('underscore');
 const bcrypt = require('bcrypt');
 const userSchema = require('../schema/user-schema');
 const validateSchema = require('../validations/user-validation');
-const { getUsers, createUser, getUserById } = require('../data-access/user-data-access');
+const { getUsers, createUser, getUserById, getUsersByLoginSearch } = require('../data-access/user-data-access');
+const { getUsersData, getUserDataByID, addUser } = require('../services/user-service');
 const userRouter = express.Router();
 
 let users = [{
@@ -48,35 +49,27 @@ userRouter.post('/login', (req, res) => {
     //         message: "Invalid Login id and password entered"
     //     });
     // }
-    getUserById('003').then(user => console.log(user.dataValues)).catch(err => console.log(err))
+    // getUserById('003').then(user => console.log(user.dataValues)).catch(err => console.log(err))
 
 });
 
-userRouter.get('/users', checkAccessPermission, (req, res) => {
-    getUsers().then((users) => {
-        res.status(200).json(users);
-    }).catch(err => {
-        res.status(500).json({
-            message: "Something broken"
-        });
-    })
+userRouter.get('/users', checkAccessPermission, async (req, res) => {
+    const { result, err } = await getUsersData();
+    if (result) res.status(200).json(result);
+    if (err) res.status(500).json(err);
 });
 
-userRouter.get('/users/:id', checkAccessPermission, (req, res) => {
-    getUserById(req.params.id).then(user => {
-        if (user) {
-            res.status(200).json(user);
-        } else {
-            res.status(404).json({
-                message: `User with id ${req.params.id} not found`
-            });
-        }
-    }).catch(err => {
-        res.status(500).json({
-            error: err,
-            message: "something borken"
+userRouter.get('/users/:id', checkAccessPermission, async (req, res) => {
+    const id = req.params.id;
+    const { user, err } = await getUserDataByID(id);
+    if (user) {
+        res.status(200).json(user);
+    } else {
+        res.status(404).json({
+            message: `User with id ${req.params.id} not found`
         });
-    });
+    }
+    if (err) res.status(500).json(err);
 });
 
 userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, (req, res) => {
@@ -105,38 +98,11 @@ userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, 
     }
 });
 
-userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, (req, res) => {
-    getUserById(req.body.id).then(userExist => {
-        if (!userExist) {
-            bcrypt.hash(req.body.password, saltRounds).then(hash => {
-                const user = {
-                    id: req.body.id,
-                    login: req.body.login,
-                    password: hash,
-                    age: req.body.age,
-                    isDeleted: false
-                };
-                createUser(user).then(() => {
-                    res.status(200).json({
-                        message: `User with id ${req.body.id} created successfully`
-                    });
-                }).catch(err => {
-                    res.status(500).json({
-                        error: err,
-                        message: "something borken"
-                    });
-                });
-            });
-        } else {
-            res.status(409).json({
-                message: `User with id ${req.body.id} already exist`
-            });
-        }
-    }).catch(err => {
-        res.status(500).json({
-            error: err,
-            message: "something borken"
-        });
+userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
+    const { id, login, password, age } = req.body;
+    const result = await addUser(id, login, password, age);
+    res.status(result.status).json({
+        message: result.message
     });
 });
 
@@ -160,20 +126,16 @@ userRouter.delete('/users/:id', checkAccessPermission, (req, res) => {
 });
 
 userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
-    const searchString = req.query.search;
-    const limit = req.query.limit;
-    const result = await getAutoSuggestUsers(searchString, limit);
-    if (result.length) {
-        res.status(200).json(result);
-    } else {
-        res.status(404).json({
-            message: `No results found`
-        })
-    }
+    const { search, limit } = req.query;
+    getUsersByLoginSearch(search, limit).then((users) => {
+        res.status(200).json(users);
+    }).catch(err => {
+        console.log("ERROR:", err);
+        res.status(500).json({
+            err: err,
+            message: `Invalid Query Value`
+        });
+    });
 });
-
-function getAutoSuggestUsers(loginSubstring, limit) {
-    return users.filter(user => user.login.startsWith(loginSubstring)).sort((user1, user2) => user1.login > user2.login).slice(0, limit);
-}
 
 module.exports = userRouter;
