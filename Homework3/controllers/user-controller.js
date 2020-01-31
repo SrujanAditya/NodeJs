@@ -3,8 +3,7 @@ const _ = require('underscore');
 const bcrypt = require('bcrypt');
 const userSchema = require('../schema/user-schema');
 const validateSchema = require('../validations/user-validation');
-const { getUsers, createUser, getUserById, getUsersByLoginSearch } = require('../data-access/user-data-access');
-const { getUsersData, getUserDataByID, addUser } = require('../services/user-service');
+const { getUsersData, getUserDataByID, addUser, updateUserData, getUsersByLogin } = require('../services/user-service');
 const userRouter = express.Router();
 
 let users = [{
@@ -127,15 +126,8 @@ userRouter.delete('/users/:id', checkAccessPermission, (req, res) => {
 
 userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
     const { search, limit } = req.query;
-    getUsersByLoginSearch(search, limit).then((users) => {
-        res.status(200).json(users);
-    }).catch(err => {
-        console.log("ERROR:", err);
-        res.status(500).json({
-            err: err,
-            message: `Invalid Query Value`
-        });
-    });
+    const result = await getUsersByLogin(search, limit);
+    res.status(result.status).json(result.message);
 });
 
 module.exports = userRouter;

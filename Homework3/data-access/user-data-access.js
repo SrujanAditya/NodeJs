@@ -13,7 +13,7 @@ const getUserById = async (id) => {
 const getUsersByLoginSearch = async (loginSubString, limit) => {
     return await userModal.findAll({
         where: {
-            login: { $like: `${loginSubString}%` }
+            login: { [op.like]: `${loginSubString}%` }
         },
         order: [
             ['login', 'ASC']

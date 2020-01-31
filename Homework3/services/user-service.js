@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 10;
 
-
 const getUsersData = async () => {
     let result, err;
     await getUsers().then(users => {
@@ -30,7 +29,7 @@ const getUserDataByID = async (id) => {
 
 const addUser = async (id, login, password, age) => {
     let result;
-    await bcrypt.hash(password, saltRounds).then(async(hash) => {
+    await bcrypt.hash(password, saltRounds).then(async (hash) => {
         const user = {
             id,
             login,
@@ -53,8 +52,30 @@ const addUser = async (id, login, password, age) => {
     return result;
 }
 
+const updateUserData = async (id, login, password, age) => {
+
+}
+
+const getUsersByLogin = async (searchString, limit) => {
+    let result;
+    await getUsersByLoginSearch(searchString, limit).then(users => {
+        result = {
+            status: 200,
+            message: users
+        }
+    }).catch(err => {
+        result = {
+            status: 500,
+            err: err,
+            message: `Invalid Query Value`
+        }
+    });
+    return result;
+}
 module.exports = {
     getUsersData,
     getUserDataByID,
-    addUser
+    addUser,
+    updateUserData,
+    getUsersByLogin
 }
