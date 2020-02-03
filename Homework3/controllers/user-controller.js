@@ -1,9 +1,7 @@
 const express = require('express');
-const _ = require('underscore');
-const bcrypt = require('bcrypt');
 const userSchema = require('../schema/user-schema');
 const validateSchema = require('../validations/user-validation');
-const { getUsersData, getUserDataByID, addUser, updateUserData, getUsersByLogin } = require('../services/user-service');
+const { getUsersData, getUserDataByID, addUser, updateUserData, getUsersByLogin, deleteUserData } = require('../services/user-service');
 const userRouter = express.Router();
 
 let users = [{
@@ -14,8 +12,6 @@ let users = [{
 }];
 
 let access_token;
-
-const saltRounds = 10;
 
 const checkAccessPermission = (req, res, next) => {
     if (access_token) {
@@ -71,28 +67,17 @@ userRouter.get('/users/:id', checkAccessPermission, async (req, res) => {
     if (err) res.status(500).json(err);
 });
 
-userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, (req, res) => {
-    const userExist = _.find(users, { id: req.params.id });
-    if (userExist) {
-        bcrypt.hash(req.body.password, saltRounds).then(hash => {
-            users.forEach(user => {
-                if (user.id === req.body.id) {
-                    user.id = req.body.id;
-                    user.login = req.body.login;
-                    user.password = hash;
-                    user.age = req.body.age;
-                    user.isDeleted = false;
-                }
-                return user;
-            });
-            res.status(200).json({
-                message: `User with id ${req.params.id} updated successfully`
-            })
+userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
+    const param_id = req.params.id;
+    const { id, login, password, age } = req.body;
+    const result = await updateUserData(param_id, id, login, password, age);
+    if (result) {
+        res.status(200).json({
+            message: `User with id ${param_id} updated successfully`
         });
-
     } else {
         res.status(404).json({
-            message: `User with id ${req.params.id} not found`
+            message: `User with id ${param_id} not found`
         })
     }
 });
@@ -100,34 +85,36 @@ userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, 
 userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
     const { id, login, password, age } = req.body;
     const result = await addUser(id, login, password, age);
-    res.status(result.status).json({
-        message: result.message
-    });
+    if (result) {
+        res.status(200).json({
+            message: `User with id ${id} created successfully`
+        });
+    } else {
+        res.status(500).json({
+            message: `User with id ${id} already exist`
+        });
+    }
 });
 
-userRouter.delete('/users/:id', checkAccessPermission, (req, res) => {
-    let userExist = _.find(users, { id: req.params.id });
-    if (userExist) {
-        users.forEach(user => {
-            if (user.id === req.params.id) {
-                user.isDeleted = true;
-            }
-            return user;
-        });
+userRouter.delete('/users/:id', checkAccessPermission, async (req, res) => {
+    const { id } = req.params;
+    const result = await deleteUserData(id);
+    if (result) {
         res.status(200).json({
             message: "User deleted successfully"
-        })
+        });
     } else {
         res.status(404).json({
-            message: `User with id ${req.params.id} not found`
-        })
+            message: `User with id ${id} not found`
+        });
     }
 });
 
 userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
     const { search, limit } = req.query;
-    const result = await getUsersByLogin(search, limit);
-    res.status(result.status).json(result.message);
+    const { result, err } = await getUsersByLogin(search, limit);
+    if (result) res.status(200).json(result);
+    if (err) res.status(500).json(err);
 });
 
 module.exports = userRouter;

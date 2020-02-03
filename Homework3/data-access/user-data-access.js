@@ -21,16 +21,26 @@ const getUsersByLoginSearch = async (loginSubString, limit) => {
         limit: limit
     })
 }
-// https://medium.com/@sarahdherr/sequelizes-update-method-example-included-39dfed6821d
-// const updateData = async (id,login,password,) => {
-//     return await userModal.update({
-//         {login:}
-//     })
-// }
+
+const updateData = async (param_id, id, login, password, age) => {
+    return await userModal.update(
+        { id, login, password, age },
+        { returning: true, where: { id: param_id } }
+    );
+}
+
+const deleteUser = async (id) => {
+    return await userModal.update(
+        { isDeleted: true },
+        { returning: true, where: id }
+    );
+}
+
 module.exports = {
     getUsers,
     createUser,
     getUserById,
     getUsersByLoginSearch,
-    // updateData
+    updateData,
+    deleteUser
 };

@@ -1,4 +1,4 @@
-const { getUsers, createUser, getUserById, getUsersByLoginSearch } = require('../data-access/user-data-access');
+const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser } = require('../data-access/user-data-access');
 const bcrypt = require('bcrypt');
 
 const saltRounds = 10;
@@ -38,44 +38,54 @@ const addUser = async (id, login, password, age) => {
             isDeleted: false
         };
         await createUser(user).then(() => {
-            result = {
-                status: 200,
-                message: `User with id ${id} created successfully`
-            };
+            result = true;
         }).catch(err => {
-            result = {
-                status: 500,
-                message: `User with id ${id} already exist`
-            };
+            result = false;
         });
     });
     return result;
 }
 
-const updateUserData = async (id, login, password, age) => {
+const updateUserData = async (param_id, id, login, password, age) => {
+    let result;
+    await bcrypt.hash(password, saltRounds).then(async (hash) => {
+        await updateData(param_id, id, login, hash, age).then(() => {
+            result = true;
+        }).catch(err => {
+            result = false;
+        });
+    }).catch(err => {
+        result = false;
+    });
+    return result;
+}
 
+const deleteUserData = async (id) => {
+    let result;
+    await deleteUser(id).then(() => {
+        result = true;
+    }).catch(err => {
+        result = false;
+    });
+    return result;
 }
 
 const getUsersByLogin = async (searchString, limit) => {
-    let result;
+    let result, err;
     await getUsersByLoginSearch(searchString, limit).then(users => {
-        result = {
-            status: 200,
-            message: users
-        }
+        result = users;
     }).catch(err => {
-        result = {
-            status: 500,
-            err: err,
+        err = {
             message: `Invalid Query Value`
-        }
+        };
     });
-    return result;
+    return { result, err };
 }
 module.exports = {
     getUsersData,
     getUserDataByID,
     addUser,
     updateUserData,
-    getUsersByLogin
+    getUsersByLogin,
+    deleteUserData
 }
