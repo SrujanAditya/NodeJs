@@ -1,20 +1,13 @@
 const express = require('express');
 const userSchema = require('../schema/user-schema');
 const validateSchema = require('../validations/user-validation');
-const { getUsersData, getUserDataByID, addUser, updateUserData, getUsersByLogin, deleteUserData } = require('../services/user-service');
+const { getUsersData, getUserDataByID, addUser, updateUserData, getUsersByLogin, deleteUserData, getUserLoginDetails } = require('../services/user-service');
 const userRouter = express.Router();
-
-let users = [{
-    "id": "000",
-    "login": "admin@gmail.com",
-    "password": "$2b$10$wQ9iytzxUb/2QnVmOBJ3WuN9bsVgvkqG7nnoqtP5peSpJE1eTIg8y",
-    "age": 22
-}];
 
 let access_token;
 
 const checkAccessPermission = (req, res, next) => {
-    if (access_token) {
+    if (!access_token) {
         res.status(403).json({
             message: "Unauthorised operation"
         });
@@ -23,29 +16,20 @@ const checkAccessPermission = (req, res, next) => {
     }
 }
 
-userRouter.post('/login', (req, res) => {
-    // const userExist = _.find(users, { login: req.body.login });
-    // if (userExist) {
-    //     bcrypt.compare(req.body.password, userExist.password).then(result => {
-    //         if (result) {
-    //             access_token = userExist.password;
-    //             res.status(200).json({
-    //                 message: "Login Successfull",
-    //                 access_token: userExist.password
-    //             });
-    //         } else {
-    //             res.status(401).json({
-    //                 message: "Invalid Login id and password entered"
-    //             });
-    //         }
-    //     });
-    // } else {
-    //     res.status(401).json({
-    //         message: "Invalid Login id and password entered"
-    //     });
-    // }
-    // getUserById('003').then(user => console.log(user.dataValues)).catch(err => console.log(err))
-
+userRouter.post('/login', async (req, res) => {
+    const { login, password } = req.body;
+    const result = await getUserLoginDetails(login, password);
+    if (result) {
+        access_token = result;
+        res.status(200).json({
+            message: "Login Successfull",
+            access_token: result
+        });
+    } else {
+        res.status(401).json({
+            message: "Invalid Login id and password entered"
+        });
+    }
 });
 
 userRouter.get('/users', checkAccessPermission, async (req, res) => {

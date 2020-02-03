@@ -36,11 +36,18 @@ const deleteUser = async (id) => {
     );
 }
 
+const getUserByLogin = async (login) => {
+    return await userModal.findOne({
+        where: {login:login}
+    });
+}
+
 module.exports = {
     getUsers,
     createUser,
     getUserById,
     getUsersByLoginSearch,
     updateData,
-    deleteUser
+    deleteUser,
+    getUserByLogin
 };

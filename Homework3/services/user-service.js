@@ -1,4 +1,4 @@
-const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser } = require('../data-access/user-data-access');
+const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser, getUserByLogin } = require('../data-access/user-data-access');
 const bcrypt = require('bcrypt');
 
 const saltRounds = 10;
@@ -81,11 +81,35 @@ const getUsersByLogin = async (searchString, limit) => {
     });
     return { result, err };
 }
+
+const getUserLoginDetails = async (login, password) => {
+    let result;
+    await getUserByLogin(login).then(async (user) => {
+        if (user) {
+            await bcrypt.compare(password, user.password).then((data) => {
+                if (data) {
+                    result = user.password;
+                } else {
+                    result = false;
+                }
+            }).catch(err => {
+                result = false;
+            });
+        } else {
+            result = false;
+        }
+    }).catch(err => {
+        result = false;
+    });
+    return result;
+}
+
 module.exports = {
     getUsersData,
     getUserDataByID,
     addUser,
     updateUserData,
     getUsersByLogin,
-    deleteUserData
+    deleteUserData,
+    getUserLoginDetails
 }
