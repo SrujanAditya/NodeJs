@@ -1,4 +1,6 @@
 const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser, getUserByLogin } = require('../../data-access/user-data-access');
+const { userModal } = require('../modals/users/user-modal');
+const op = require('sequelize').Op;
 const bcrypt = require('bcrypt');
 
 class UserService {
@@ -8,7 +10,7 @@ class UserService {
 
     async getUsersData() {
         let result, err;
-        await getUsers().then(users => {
+        await userModal.findAll().then(users => {
             result = users;
         }).catch(err => {
             err = {
@@ -20,7 +22,7 @@ class UserService {
 
     async getUserDataByID(id) {
         let user, err;
-        await getUserById(id).then(_user => {
+        await userModal.findByPk(id).then(_user => {
             user = _user;
         }).catch(err => {
             err = {
@@ -40,7 +42,7 @@ class UserService {
                 age,
                 isDeleted: false
             };
-            await createUser(user).then(() => {
+            await userModal.create(user).then(() => {
                 result = true;
             }).catch(err => {
                 result = false;
@@ -52,7 +54,10 @@ class UserService {
     async updateUserData(param_id, id, login, password, age) {
         let result;
         await bcrypt.hash(password, this.saltRounds).then(async (hash) => {
-            await updateData(param_id, id, login, hash, age).then(() => {
+            await userModal.update(
+                { id, login, password, age },
+                { returning: true, where: { id: param_id } }
+            ).then(() => {
                 result = true;
             }).catch(err => {
                 result = false;
@@ -65,7 +70,10 @@ class UserService {
 
     async deleteUserData(id) {
         let result;
-        await deleteUser(id).then(() => {
+        await userModal.update(
+            { isDeleted: true },
+            { returning: true, where: id }
+        ).then(() => {
             result = true;
         }).catch(err => {
             result = false;
@@ -75,7 +83,15 @@ class UserService {
 
     async getUsersByLogin(searchString, limit) {
         let result, err;
-        await getUsersByLoginSearch(searchString, limit).then(users => {
+        await userModal.findAll({
+            where: {
+                login: { [op.like]: `${searchString}%` }
+            },
+            order: [
+                ['login', 'ASC']
+            ],
+            limit: limit
+        }).then(users => {
             result = users;
         }).catch(err => {
             err = {
@@ -87,7 +103,9 @@ class UserService {
 
     async getUserLoginDetails(login, password) {
         let result;
-        await getUserByLogin(login).then(async (user) => {
+        await userModal.findOne({
+            where: { login: login }
+        }).then(async (user) => {
             if (user) {
                 await bcrypt.compare(password, user.password).then((data) => {
                     if (data) {
