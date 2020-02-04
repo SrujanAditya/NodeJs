@@ -23,11 +23,11 @@ const USER_MODAL = connection.define('users', {
         type: Sequelize.BOOLEAN,
         allowNull: false
     }
-},{
-    timestamps:false,
+}, {
+    timestamps: false,
     freezeTableName: true
 });
 
 module.exports = {
-    userModal:USER_MODAL
+    userModal: USER_MODAL
 }
