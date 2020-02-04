@@ -1,5 +1,5 @@
 const express = require('express');
-const userRoutes = require('./controllers/user-controller');
+const userRoutes = require('./controllers/users/user-controller');
 const PORT = process.env.port || 3000;
 const bodyParser = require('body-parser');
 

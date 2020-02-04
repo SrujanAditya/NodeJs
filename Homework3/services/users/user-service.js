@@ -1,10 +1,10 @@
-const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser, getUserByLogin } = require('../data-access/user-data-access');
+const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser, getUserByLogin } = require('../../data-access/user-data-access');
 const bcrypt = require('bcrypt');
 
 class UserService {
     constructor() {
         this.saltRounds = 10;
-     }
+    }
 
     async getUsersData() {
         let result, err;

@@ -1,7 +1,7 @@
 const express = require('express');
-const userSchema = require('../schema/user-schema');
-const validateSchema = require('../validations/user-validation');
-const userService = require('../services/user-service');
+const userSchema = require('../../schema/user-schema');
+const validateSchema = require('../../validations/user-validation');
+const userService = require('../../services/users/user-service');
 const userRouter = express.Router();
 
 let access_token;

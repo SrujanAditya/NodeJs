@@ -1,4 +1,4 @@
-const { userModal } = require('../modals/user-modal');
+const { userModal } = require('../modals/users/user-modal');
 const op = require('sequelize').Op;
 
 const getUsers = async () => {
