@@ -1,5 +1,4 @@
-const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser, getUserByLogin } = require('../../data-access/user-data-access');
-const { userModal } = require('../modals/users/user-modal');
+const { userModal } = require('../../modals/users/user-modal');
 const op = require('sequelize').Op;
 const bcrypt = require('bcrypt');
 
