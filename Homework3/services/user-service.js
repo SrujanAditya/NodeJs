@@ -1,115 +1,111 @@
 const { getUsers, createUser, getUserById, getUsersByLoginSearch, updateData, deleteUser, getUserByLogin } = require('../data-access/user-data-access');
 const bcrypt = require('bcrypt');
 
-const saltRounds = 10;
+class UserService {
+    constructor() {
+        this.saltRounds = 10;
+     }
 
-const getUsersData = async () => {
-    let result, err;
-    await getUsers().then(users => {
-        result = users;
-    }).catch(err => {
-        err = {
-            message: "Something Wrong"
-        }
-    });
-    return { result, err };
-}
-
-const getUserDataByID = async (id) => {
-    let user, err;
-    await getUserById(id).then(_user => {
-        user = _user;
-    }).catch(err => {
-        err = {
-            message: "Something Wrong"
-        }
-    });
-    return { user, err };
-}
-
-const addUser = async (id, login, password, age) => {
-    let result;
-    await bcrypt.hash(password, saltRounds).then(async (hash) => {
-        const user = {
-            id,
-            login,
-            password: hash,
-            age,
-            isDeleted: false
-        };
-        await createUser(user).then(() => {
-            result = true;
+    async getUsersData() {
+        let result, err;
+        await getUsers().then(users => {
+            result = users;
         }).catch(err => {
-            result = false;
+            err = {
+                message: "Something Wrong"
+            }
         });
-    });
-    return result;
-}
+        return { result, err };
+    }
 
-const updateUserData = async (param_id, id, login, password, age) => {
-    let result;
-    await bcrypt.hash(password, saltRounds).then(async (hash) => {
-        await updateData(param_id, id, login, hash, age).then(() => {
-            result = true;
+    async getUserDataByID(id) {
+        let user, err;
+        await getUserById(id).then(_user => {
+            user = _user;
         }).catch(err => {
-            result = false;
+            err = {
+                message: "Something Wrong"
+            }
         });
-    }).catch(err => {
-        result = false;
-    });
-    return result;
-}
+        return { user, err };
+    }
 
-const deleteUserData = async (id) => {
-    let result;
-    await deleteUser(id).then(() => {
-        result = true;
-    }).catch(err => {
-        result = false;
-    });
-    return result;
-}
-
-const getUsersByLogin = async (searchString, limit) => {
-    let result, err;
-    await getUsersByLoginSearch(searchString, limit).then(users => {
-        result = users;
-    }).catch(err => {
-        err = {
-            message: `Invalid Query Value`
-        };
-    });
-    return { result, err };
-}
-
-const getUserLoginDetails = async (login, password) => {
-    let result;
-    await getUserByLogin(login).then(async (user) => {
-        if (user) {
-            await bcrypt.compare(password, user.password).then((data) => {
-                if (data) {
-                    result = user.password;
-                } else {
-                    result = false;
-                }
+    async addUser(id, login, password, age) {
+        let result;
+        await bcrypt.hash(password, this.saltRounds).then(async (hash) => {
+            const user = {
+                id,
+                login,
+                password: hash,
+                age,
+                isDeleted: false
+            };
+            await createUser(user).then(() => {
+                result = true;
             }).catch(err => {
                 result = false;
             });
-        } else {
+        });
+        return result;
+    }
+
+    async updateUserData(param_id, id, login, password, age) {
+        let result;
+        await bcrypt.hash(password, this.saltRounds).then(async (hash) => {
+            await updateData(param_id, id, login, hash, age).then(() => {
+                result = true;
+            }).catch(err => {
+                result = false;
+            });
+        }).catch(err => {
             result = false;
-        }
-    }).catch(err => {
-        result = false;
-    });
-    return result;
+        });
+        return result;
+    }
+
+    async deleteUserData(id) {
+        let result;
+        await deleteUser(id).then(() => {
+            result = true;
+        }).catch(err => {
+            result = false;
+        });
+        return result;
+    }
+
+    async getUsersByLogin(searchString, limit) {
+        let result, err;
+        await getUsersByLoginSearch(searchString, limit).then(users => {
+            result = users;
+        }).catch(err => {
+            err = {
+                message: `Invalid Query Value`
+            };
+        });
+        return { result, err };
+    }
+
+    async getUserLoginDetails(login, password) {
+        let result;
+        await getUserByLogin(login).then(async (user) => {
+            if (user) {
+                await bcrypt.compare(password, user.password).then((data) => {
+                    if (data) {
+                        result = user.password;
+                    } else {
+                        result = false;
+                    }
+                }).catch(err => {
+                    result = false;
+                });
+            } else {
+                result = false;
+            }
+        }).catch(err => {
+            result = false;
+        });
+        return result;
+    }
 }
 
-module.exports = {
-    getUsersData,
-    getUserDataByID,
-    addUser,
-    updateUserData,
-    getUsersByLogin,
-    deleteUserData,
-    getUserLoginDetails
-}
+module.exports = new UserService();

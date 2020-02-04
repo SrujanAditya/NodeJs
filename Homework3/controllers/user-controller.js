@@ -1,7 +1,7 @@
 const express = require('express');
 const userSchema = require('../schema/user-schema');
 const validateSchema = require('../validations/user-validation');
-const { getUsersData, getUserDataByID, addUser, updateUserData, getUsersByLogin, deleteUserData, getUserLoginDetails } = require('../services/user-service');
+const userService = require('../services/user-service');
 const userRouter = express.Router();
 
 let access_token;
@@ -18,7 +18,7 @@ const checkAccessPermission = (req, res, next) => {
 
 userRouter.post('/login', async (req, res) => {
     const { login, password } = req.body;
-    const result = await getUserLoginDetails(login, password);
+    const result = await userService.getUserLoginDetails(login, password);
     if (result) {
         access_token = result;
         res.status(200).json({
@@ -33,14 +33,14 @@ userRouter.post('/login', async (req, res) => {
 });
 
 userRouter.get('/users', checkAccessPermission, async (req, res) => {
-    const { result, err } = await getUsersData();
+    const { result, err } = await userService.getUsersData();
     if (result) res.status(200).json(result);
     if (err) res.status(500).json(err);
 });
 
 userRouter.get('/users/:id', checkAccessPermission, async (req, res) => {
     const id = req.params.id;
-    const { user, err } = await getUserDataByID(id);
+    const { user, err } = await userService.getUserDataByID(id);
     if (user) {
         res.status(200).json(user);
     } else {
@@ -54,7 +54,7 @@ userRouter.get('/users/:id', checkAccessPermission, async (req, res) => {
 userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
     const param_id = req.params.id;
     const { id, login, password, age } = req.body;
-    const result = await updateUserData(param_id, id, login, password, age);
+    const result = await userService.updateUserData(param_id, id, login, password, age);
     if (result) {
         res.status(200).json({
             message: `User with id ${param_id} updated successfully`
@@ -68,7 +68,7 @@ userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, 
 
 userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
     const { id, login, password, age } = req.body;
-    const result = await addUser(id, login, password, age);
+    const result = await userService.addUser(id, login, password, age);
     if (result) {
         res.status(200).json({
             message: `User with id ${id} created successfully`
@@ -82,7 +82,7 @@ userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, a
 
 userRouter.delete('/users/:id', checkAccessPermission, async (req, res) => {
     const { id } = req.params;
-    const result = await deleteUserData(id);
+    const result = await userService.deleteUserData(id);
     if (result) {
         res.status(200).json({
             message: "User deleted successfully"
@@ -96,7 +96,7 @@ userRouter.delete('/users/:id', checkAccessPermission, async (req, res) => {
 
 userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
     const { search, limit } = req.query;
-    const { result, err } = await getUsersByLogin(search, limit);
+    const { result, err } = await userService.getUsersByLogin(search, limit);
     if (result) res.status(200).json(result);
     if (err) res.status(500).json(err);
 });
