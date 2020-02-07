@@ -6,29 +6,29 @@ class GroupService {
         this.saltRounds = 10;
     }
 
-    // async getGroupsData() {
-    //     let result, err;
-    //     await groupModal.findAll().then(groups => {
-    //         result = groups;
-    //     }).catch(err => {
-    //         err = {
-    //             message: "Something Wrong"
-    //         }
-    //     });
-    //     return { result, err };
-    // }
+    async getGroupsData() {
+        let result, err;
+        await groupModal.findAll().then(groups => {
+            result = groups;
+        }).catch(err => {
+            err = {
+                message: "Something Wrong"
+            }
+        });
+        return { result, err };
+    }
 
-    // async getGroupDataByID(id) {
-    //     let group, err;
-    //     await groupModal.findByPk(id).then(_group => {
-    //         group = _group;
-    //     }).catch(err => {
-    //         err = {
-    //             message: "Something Wrong"
-    //         }
-    //     });
-    //     return { group, err };
-    // }
+    async getGroupDataByID(id) {
+        let group, err;
+        await groupModal.findByPk(id).then(_group => {
+            group = _group;
+        }).catch(err => {
+            err = {
+                message: "Something Wrong"
+            }
+        });
+        return { group, err };
+    }
 
     // async addGroup(id, name, permissions) {
     //     let result;

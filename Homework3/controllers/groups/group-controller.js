@@ -17,23 +17,23 @@ const checkAccessPermission = (req, res, next) => {
 }
 
 groupRouter.get('/groups',checkAccessPermission, async (req, res) => {
-    // const { result, err } = await groupService.getGroupsData();
-    // if (result) res.status(200).json(result);
-    // if (err) res.status(500).json(err);
-});
+    const { result, err } = await groupService.getGroupsData();
+    if (result) res.status(200).json(result);
+    if (err) res.status(500).json(err);
+}); 
 
-// groupRouter.get('/groups/:id', checkAccessPermission, async (req, res) => {
-//     const id = req.params.id;
-//     const { user, err } = await userService.getUserDataByID(id);
-//     if (user) {
-//         res.status(200).json(user);
-//     } else {
-//         res.status(404).json({
-//             message: `User with id ${req.params.id} not found`
-//         });
-//     }
-//     if (err) res.status(500).json(err);
-// });
+groupRouter.get('/groups/:id', checkAccessPermission, async (req, res) => {
+    const id = req.params.id;
+    const { group, err } = await groupService.getGroupDataByID(id);
+    if (group) {
+        res.status(200).json(group);
+    } else {
+        res.status(404).json({
+            message: `User with id ${req.params.id} not found`
+        });
+    }
+    if (err) res.status(500).json(err);
+});
 
 // groupRouter.put('/groups/:id', validateSchema(groupSchema), checkAccessPermission, async (req, res) => {
 //     const param_id = req.params.id;
