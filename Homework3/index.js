@@ -1,5 +1,6 @@
 const express = require('express');
 const userRoutes = require('./controllers/users/user-controller');
+const groupRoutes = require('./controllers/groups/group-controller');
 const PORT = process.env.port || 3000;
 const bodyParser = require('body-parser');
 
@@ -14,6 +15,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', userRoutes);
+app.use('/api', groupRoutes);
+
 
 app.use(function (err, req, res, next) {
     console.error(err.stack)

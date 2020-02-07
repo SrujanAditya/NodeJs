@@ -1,6 +1,6 @@
 const db = require('../../data-access/models/index');
 
-const Permissions = ['READ','WRITE','DELETE','SHARE','UPLOAD_FILES'];
+// const Permissions = ['READ','WRITE','DELETE','SHARE','UPLOAD_FILES'];
 
 const GROUP_MODAL = db.sequelize.define('Groups', {
     id: {
