@@ -1,26 +1,25 @@
-const Sequelize = require('sequelize');
-const connection = require('../../connection/sequelize-connection');
+const db = require('../../data-access/models/index');
 
-const USER_MODAL = connection.define('Users', {
+const USER_MODAL = db.sequelize.define('Users', {
     id: {
-        type: Sequelize.STRING,
+        type: db.Sequelize.STRING,
         allowNull: false,
         primaryKey: true
     },
     login: {
-        type: Sequelize.STRING,
+        type: db.Sequelize.STRING,
         allowNull: false
     },
     password: {
-        type: Sequelize.STRING,
+        type: db.Sequelize.STRING,
         allowNull: false
     },
     age: {
-        type: Sequelize.INTEGER,
+        type: db.Sequelize.INTEGER,
         allowNull: false
     },
     isDeleted: {
-        type: Sequelize.BOOLEAN,
+        type: db.Sequelize.BOOLEAN,
         allowNull: false
     }
 }, {
