@@ -29,7 +29,7 @@ groupRouter.get('/groups/:id', checkAccessPermission, async (req, res) => {
         res.status(200).json(group);
     } else {
         res.status(404).json({
-            message: `User with id ${req.params.id} not found`
+            message: `Group with id ${req.params.id} not found`
         });
     }
     if (err) res.status(500).json(err);
@@ -37,43 +37,43 @@ groupRouter.get('/groups/:id', checkAccessPermission, async (req, res) => {
 
 // groupRouter.put('/groups/:id', validateSchema(groupSchema), checkAccessPermission, async (req, res) => {
 //     const param_id = req.params.id;
-//     const { id, login, password, age } = req.body;
-//     const result = await userService.updateUserData(param_id, id, login, password, age);
+//     const { id, name, permissions } = req.body;
+//     const result = await groupService.updateGroupData(param_id, id, name, permissions);
 //     if (result) {
 //         res.status(200).json({
-//             message: `User with id ${param_id} updated successfully`
+//             message: `Group with id ${param_id} updated successfully`
 //         });
 //     } else {
 //         res.status(404).json({
-//             message: `User with id ${param_id} not found`
+//             message: `Group with id ${param_id} not found`
 //         })
 //     }
 // });
 
 // groupRouter.post('/groups/add', validateSchema(groupSchema), checkAccessPermission, async (req, res) => {
-//     const { id, login, password, age } = req.body;
-//     const result = await userService.addUser(id, login, password, age);
+//     const { id, name, permissions } = req.body;
+//     const result = await groupService.addGroup(id, name, permissions);
 //     if (result) {
 //         res.status(200).json({
-//             message: `User with id ${id} created successfully`
+//             message: `Group with id ${id} created successfully`
 //         });
 //     } else {
 //         res.status(500).json({
-//             message: `User with id ${id} already exist`
+//             message: `Group with id ${id} already exist`
 //         });
 //     }
 // });
 
 // groupRouter.delete('/groups/:id', checkAccessPermission, async (req, res) => {
 //     const { id } = req.params;
-//     const result = await userService.deleteUserData(id);
+//     const result = await groupService.deleteGroupData(id);
 //     if (result) {
 //         res.status(200).json({
-//             message: "User deleted successfully"
+//             message: "Group deleted successfully"
 //         });
 //     } else {
 //         res.status(404).json({
-//             message: `User with id ${id} not found`
+//             message: `Group with id ${id} not found`
 //         });
 //     }
 // });
