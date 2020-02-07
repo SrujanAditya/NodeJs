@@ -7,7 +7,6 @@ const userRouter = express.Router();
 let access_token;
 
 const checkAccessPermission = (req, res, next) => {
-    console.log(req.session.authId);
     if (!req.session.authId) {
         res.status(403).json({
             message: "Unauthorised operation"
@@ -21,7 +20,6 @@ userRouter.post('/login', async (req, res) => {
     const { login, password } = req.body;
     const result = await userService.getUserLoginDetails(login, password);
     if (result) {
-        // access_token = result;
         req.session.authId = result;
         res.status(200).json({
             message: "Login Successfull",
