@@ -30,7 +30,6 @@ userRouter.post('/login', async (req, res) => {
             message: "Invalid Login id and password entered"
         });
     }
-    console.log(req.session.authId);
 });
 
 userRouter.get('/users', checkAccessPermission, async (req, res) => {
