@@ -13,7 +13,7 @@ const GROUP_MODAL = db.sequelize.define('Groups', {
         allowNull: false
     },
     permissions: {
-        type: db.Sequelize.ARRAY(db.sequelize.STRING),
+        type: db.Sequelize.ARRAY(db.Sequelize.STRING),
         allowNull: false
     }
 }, {
