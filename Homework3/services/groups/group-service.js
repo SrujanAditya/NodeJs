@@ -30,38 +30,48 @@ class GroupService {
         return { group, err };
     }
 
-    // async addGroup(id, name, permissions) {
-    //     let result;
-    //     const group = {
-    //         id,
-    //         name,
-    //         permissions
-    //     };
-    //     await groupModal.create(group).then(() => {
-    //         result = true;
-    //     }).catch(err => {
-    //         result = false;
-    //     });
+    async addGroup(id, name, permissions) {
+        let result;
+        const group = {
+            id,
+            name,
+            permissions
+        };
+        await groupModal.create(group).then(() => {
+            result = true;
+        }).catch(err => {
+            result = false;
+        });
 
-    //     return result;
-    // }
+        return result;
+    }
 
-    // async updateGroupData(param_id, id, name, permissions) {
-    //     let result;
-    //     await groupModal.update(
-    //         { id, name, permissions },
-    //         { returning: true, where: { id: param_id } }
-    //     ).then(() => {
-    //         result = true;
-    //     }).catch(err => {
-    //         result = false;
-    //     });
-    //     return result;
-    // }
+    async updateGroupData(param_id, id, name, permissions) {
+        let result, data, err;
+        await groupModal.update(
+            { id, name, permissions },
+            { returning: true, where: { id: param_id } }
+        ).then((group) => {
+            data = group;
+            result = true;
+        }).catch(_err => {
+            err = _err;
+            result = false;
+        });
+        return { result, data, err };
+    }
 
-    // async deleteGroupData(id) {
-    //     //delete the group and its references in other groups
-    // }
+    async deleteGroupData(id) {
+        let result;
+        await groupModal.destroy(
+            { where: { id: id } }
+        ).then(() => {
+            result = true
+        }).catch(err => {
+            result = false;
+        });
+        return result;
+    }
 }
 
 module.exports = new GroupService();

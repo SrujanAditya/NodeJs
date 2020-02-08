@@ -74,7 +74,7 @@ userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, a
             message: `User with id ${id} created successfully`
         });
     } else {
-        res.status(500).json({
+        res.status(422).json({
             message: `User with id ${id} already exist`
         });
     }
