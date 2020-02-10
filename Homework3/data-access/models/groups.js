@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true
   });
   Groups.associate = function (models) {
-    // associations can be defined here
+    Groups.belongsToMany(models.Users, { through: "UserGroup", foreignKey: 'groupId' });
   };
   return Groups;
 };
