@@ -107,11 +107,11 @@ userRouter.post('/addUserToGroup', validateSchema(userGroupSchema), checkAccessP
     const result = await userService.addUsersToGroup(groupId, userIds);
     if (result) {
         res.status(200).json({
-            message: `User with id ${id} created successfully`
+            message: `Users added to group Id ${groupId} successfully`
         });
     } else {
         res.status(422).json({
-            message: `User with id ${id} already exist`
+            message: `User with id ${groupId} already exist`
         });
     }
 });
