@@ -1,4 +1,5 @@
 const { userModal } = require('../../modals/users/user-modal');
+const { userGroupModal } = require('../../modals/users/user-group-modal');
 const op = require('sequelize').Op;
 const bcrypt = require('bcrypt');
 
@@ -122,6 +123,10 @@ class UserService {
             result = false;
         });
         return result;
+    }
+
+    async addUsersToGroup(groupId, userIds) {
+        let result;
     }
 }
 

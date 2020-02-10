@@ -1,5 +1,6 @@
 const express = require('express');
 const userSchema = require('../../schema/user-schema');
+const userGroupSchema = require('../../schema/user-group-schema');
 const validateSchema = require('../../validations/user-validation');
 const userService = require('../../services/users/user-service');
 const userRouter = express.Router();
@@ -99,6 +100,20 @@ userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
     const { result, err } = await userService.getUsersByLogin(search, limit);
     if (result) res.status(200).json(result);
     if (err) res.status(500).json(err);
+});
+
+userRouter.post('/addUserToGroup', validateSchema(userGroupSchema), checkAccessPermission, async (req, res) => {
+    const { groupId, userIds } = req.body;
+    const result = await userService.addUsersToGroup(groupId, userIds);
+    if (result) {
+        res.status(200).json({
+            message: `User with id ${id} created successfully`
+        });
+    } else {
+        res.status(422).json({
+            message: `User with id ${id} already exist`
+        });
+    }
 });
 
 module.exports = userRouter;

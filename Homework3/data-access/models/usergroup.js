@@ -25,8 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   UserGroup.associate = function(models) {
-    UserGroup.belongsTo(models.User, {foreignKey: 'userId'});
-    UsersWorkingDay.belongsTo(models.Group, {foreignKey: 'groupId'});
   };
   return UserGroup;
 };
