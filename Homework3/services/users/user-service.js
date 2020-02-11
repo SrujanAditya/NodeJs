@@ -1,6 +1,7 @@
 const { userModal } = require('../../modals/users/user-modal');
 const { userGroupModal } = require('../../modals/users/user-group-modal');
 const op = require('sequelize').Op;
+const sequelize = require('sequelize')
 const bcrypt = require('bcrypt');
 
 class UserService {
@@ -127,6 +128,17 @@ class UserService {
 
     async addUsersToGroup(groupId, userIds) {
         let result;
+        let insertdata=[];
+        userIds.forEach(id => {
+            insertdata.push({
+                userId: id,
+                groupId:groupId
+            })
+        });
+        console.log(insertdata);
+        return true;
+        // sequelize.transaction(){}
+
     }
 }
 

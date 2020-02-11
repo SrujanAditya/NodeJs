@@ -8,7 +8,7 @@ const userRouter = express.Router();
 let access_token;
 
 const checkAccessPermission = (req, res, next) => {
-    if (!access_token) {
+    if (access_token) {
         res.status(403).json({
             message: "Unauthorised operation"
         });

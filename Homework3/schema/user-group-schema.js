@@ -1,8 +1,8 @@
 const Joi = require('joi');
 
 const userGroupSchema = Joi.object().keys({
-    userId: Joi.string().required(),
-    groupId: Joi.array().required()
+    groupId: Joi.string().required(),
+    userIds: Joi.array().required()
 });
 
 module.exports = userGroupSchema;
