@@ -8,7 +8,7 @@ const userRouter = express.Router();
 let access_token;
 
 const checkAccessPermission = (req, res, next) => {
-    if (access_token) {
+    if (!access_token) {
         res.status(403).json({
             message: "Unauthorised operation"
         });
@@ -104,14 +104,14 @@ userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
 
 userRouter.post('/addUserToGroup', validateSchema(userGroupSchema), checkAccessPermission, async (req, res) => {
     const { groupId, userIds } = req.body;
-    const result = await userService.addUsersToGroup(groupId, userIds);
+    let result = await userService.addUsersToGroup(groupId, userIds);
     if (result) {
         res.status(200).json({
             message: `Users added to group Id ${groupId} successfully`
         });
     } else {
-        res.status(422).json({
-            message: `User with id ${groupId} already exist`
+        res.status(409).json({
+            message: `Users not added to group Id ${groupId}, due to voilation of constraints`
         });
     }
 });
