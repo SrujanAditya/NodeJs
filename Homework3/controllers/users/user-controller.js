@@ -1,27 +1,16 @@
 const express = require('express');
 const userSchema = require('../../schema/user-schema');
 const userGroupSchema = require('../../schema/user-group-schema');
-const validateSchema = require('../../validations/user-validation');
+const { validateSchema, checkAccessPermission } = require('../../validations/user-validation');
 const userService = require('../../services/users/user-service');
 const userRouter = express.Router();
-
-let access_token;
-
-const checkAccessPermission = (req, res, next) => {
-    if (!access_token) {
-        res.status(403).json({
-            message: "Unauthorised operation"
-        });
-    } else {
-        next();
-    }
-}
 
 userRouter.post('/login', async (req, res) => {
     const { login, password } = req.body;
     const result = await userService.getUserLoginDetails(login, password);
     if (result) {
         access_token = result;
+        req.session.authId = result;
         res.status(200).json({
             message: "Login Successfull",
             access_token: result

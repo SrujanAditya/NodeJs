@@ -1,20 +1,8 @@
 const express = require('express');
 const groupSchema = require('../../schema/group-schema');
-const validateSchema = require('../../validations/user-validation');
+const { validateSchema, checkAccessPermission } = require('../../validations/user-validation');
 const groupService = require('../../services/groups/group-service');
 const groupRouter = express.Router();
-
-let access_token;
-
-const checkAccessPermission = (req, res, next) => {
-    if (!access_token) {
-        res.status(403).json({
-            message: "Unauthorised operation"
-        });
-    } else {
-        next();
-    }
-}
 
 groupRouter.get('/groups', checkAccessPermission, async (req, res) => {
     const { result, err } = await groupService.getGroupsData();
