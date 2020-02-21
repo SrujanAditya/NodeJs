@@ -1,11 +1,25 @@
 const express = require('express');
-const userRoutes = require('./userRoutes/users');
+const userRoutes = require('./controllers/users/user-controller');
+const groupRoutes = require('./controllers/groups/group-controller');
 const PORT = process.env.port || 3000;
 const bodyParser = require('body-parser');
+const session = require('express-session');
 
 const app = express();
 
 app.use(bodyParser.json());
+app.use(session({
+    name: 'user',
+    resave: false,
+    saveUninitialized: false,
+    secret: 'ssh!quiet,it\'asecret!',
+    authId: null,
+    cookie: {
+        maxAge: 1000 * 60 * 60,
+        secure: true,
+        sameSite: true
+    }
+}));
 
 app.use((req, res, next) => {
     console.log(`Time: ${Date.now()}`);
@@ -14,6 +28,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', userRoutes);
+app.use('/api', groupRoutes);
+
 
 app.use(function (err, req, res, next) {
     console.error(err.stack)
