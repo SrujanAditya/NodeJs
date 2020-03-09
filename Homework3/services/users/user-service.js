@@ -27,20 +27,16 @@ class UserService {
     }
 
     async updateUserData(param_id, id, login, password, age) {
-        let result;
-        await bcrypt.hash(password, this.saltRounds).then(async (hash) => {
-            await userModal.update(
-                { id, login, password, age },
-                { returning: true, where: { id: param_id } }
-            ).then(() => {
-                result = true;
-            }).catch(err => {
-                result = false;
-            });
-        }).catch(err => {
-            result = false;
-        });
-        return result;
+        let hash;
+        try {
+            hash = await bcrypt.hash(password, this.saltRounds);
+        } catch (err) {
+            throw new Error(err);
+        }
+        return await userModal.update(
+            { id, login, password: hash, age },
+            { returning: true, where: { id: param_id } }
+        );
     }
 
     async getUsersByLogin(searchString, limit) {
@@ -88,24 +84,16 @@ class UserService {
     }
 
     async addUsersToGroup(groupId, userIds) {
-        let result;
         let insertData = [];
         userIds.forEach(id => {
             insertData.push({
                 userId: id,
                 groupId: groupId
-            })
+            });
         });
-        await db.sequelize.transaction(t => {
+        return await db.sequelize.transaction(t => {
             return userGroupModal.bulkCreate(insertData, { transaction: t })
-        }).then(res => {
-            console.log(res);
-            result = true;
-        }).catch(err => {
-            console.log(err);
-            result = false;
         });
-        return result;
     }
 }
 

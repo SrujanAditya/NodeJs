@@ -1,8 +1,8 @@
 const express = require('express');
 const groupSchema = require('../../schema/group-schema');
 const { validateSchema, checkAccessPermission } = require('../../validations/user-validation');
-const groupRouter = express.Router();
 const { groupModal } = require('../../modals/groups/group-modal');
+const groupRouter = express.Router();
 
 groupRouter.get('/groups', checkAccessPermission, async (req, res) => {
     try {

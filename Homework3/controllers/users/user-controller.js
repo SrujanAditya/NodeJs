@@ -3,8 +3,8 @@ const userSchema = require('../../schema/user-schema');
 const userGroupSchema = require('../../schema/user-group-schema');
 const { validateSchema, checkAccessPermission } = require('../../validations/user-validation');
 const userService = require('../../services/users/user-service');
-const userRouter = express.Router();
 const { userModal } = require('../../modals/users/user-modal');
+const userRouter = express.Router();
 
 userRouter.post('/login', async (req, res) => {
     const { login, password } = req.body;
@@ -51,16 +51,21 @@ userRouter.get('/users/:id', checkAccessPermission, async (req, res) => {
 userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
     const param_id = req.params.id;
     const { id, login, password, age } = req.body;
-    const result = await userService.updateUserData(param_id, id, login, password, age);
-    if (result) {
-        res.status(200).json({
-            message: `User with id ${param_id} updated successfully`
-        });
-    } else {
-        res.status(404).json({
-            message: `User with id ${param_id} not found`
-        })
+    try {
+        const result = await userService.updateUserData(param_id, id, login, password, age);
+        if (result[0]) {
+            res.status(200).json({
+                message: `User with id ${param_id} updated successfully`
+            });
+        } else {
+            res.status(404).json({
+                message: `User with id ${param_id} not found`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
+
 });
 
 userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
@@ -111,16 +116,21 @@ userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
 
 userRouter.post('/addUserToGroup', validateSchema(userGroupSchema), checkAccessPermission, async (req, res) => {
     const { groupId, userIds } = req.body;
-    let result = await userService.addUsersToGroup(groupId, userIds);
-    if (result) {
-        res.status(200).json({
-            message: `Users added to group Id ${groupId} successfully`
-        });
-    } else {
-        res.status(409).json({
-            message: `Users not added to group Id ${groupId}, due to voilation of constraints`
-        });
+    try {
+        const result = await userService.addUsersToGroup(groupId, userIds);
+        if (result) {
+            res.status(200).json({
+                message: `Users added to group Id ${groupId} successfully`
+            });
+        } else {
+            res.status(409).json({
+                message: `Users not added to group Id ${groupId}, due to voilation of constraints`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
+
 });
 
 module.exports = userRouter;
