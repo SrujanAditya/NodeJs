@@ -4,6 +4,7 @@ const userGroupSchema = require('../../schema/user-group-schema');
 const { validateSchema, checkAccessPermission } = require('../../validations/user-validation');
 const userService = require('../../services/users/user-service');
 const userRouter = express.Router();
+const { userModal } = require('../../modals/users/user-modal');
 
 userRouter.post('/login', async (req, res) => {
     const { login, password } = req.body;
@@ -23,22 +24,28 @@ userRouter.post('/login', async (req, res) => {
 });
 
 userRouter.get('/users', checkAccessPermission, async (req, res) => {
-    const { result, err } = await userService.getUsersData();
-    if (result) res.status(200).json(result);
-    if (err) res.status(500).json(err);
+    try {
+        const users = await userModal.findAll()
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
 userRouter.get('/users/:id', checkAccessPermission, async (req, res) => {
-    const id = req.params.id;
-    const { user, err } = await userService.getUserDataByID(id);
-    if (user) {
-        res.status(200).json(user);
-    } else {
-        res.status(404).json({
-            message: `User with id ${req.params.id} not found`
-        });
+    try {
+        const user = await userModal.findByPk(req.params.id);
+        if (user) {
+            res.status(200).json(user);
+        }
+        else {
+            res.status(404).json({
+                message: `User with id ${req.params.id} not found`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
-    if (err) res.status(500).json(err);
 });
 
 userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
@@ -58,29 +65,40 @@ userRouter.put('/users/:id', validateSchema(userSchema), checkAccessPermission, 
 
 userRouter.post('/addUser', validateSchema(userSchema), checkAccessPermission, async (req, res) => {
     const { id, login, password, age } = req.body;
-    const result = await userService.addUser(id, login, password, age);
-    if (result) {
-        res.status(200).json({
-            message: `User with id ${id} created successfully`
-        });
-    } else {
-        res.status(422).json({
-            message: `User with id ${id} already exist`
-        });
+    try {
+        const result = await userService.addUser(id, login, password, age);
+        if (result) {
+            res.status(200).json({
+                message: `User with id ${id} created successfully`
+            });
+        } else {
+            res.status(422).json({
+                message: `User with id ${id} already exist`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
+
 });
 
 userRouter.delete('/users/:id', checkAccessPermission, async (req, res) => {
-    const { id } = req.params;
-    const result = await userService.deleteUserData(id);
-    if (result) {
-        res.status(200).json({
-            message: "User deleted successfully"
-        });
-    } else {
-        res.status(404).json({
-            message: `User with id ${id} not found`
-        });
+    try {
+        const result = await userModal.update(
+            { isDeleted: true },
+            { returning: true, where: req.params.id }
+        );
+        if (result) {
+            res.status(200).json({
+                message: "User deleted successfully"
+            });
+        } else {
+            res.status(404).json({
+                message: `User with id ${req.params.id} not found`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
 });
 

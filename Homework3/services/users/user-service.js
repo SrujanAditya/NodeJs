@@ -9,47 +9,21 @@ class UserService {
         this.saltRounds = 10;
     }
 
-    async getUsersData() {
-        let result, err;
-        await userModal.findAll().then(users => {
-            result = users;
-        }).catch(err => {
-            err = {
-                message: "Something Wrong"
-            }
-        });
-        return { result, err };
-    }
-
-    async getUserDataByID(id) {
-        let user, err;
-        await userModal.findByPk(id).then(_user => {
-            user = _user;
-        }).catch(err => {
-            err = {
-                message: "Something Wrong"
-            }
-        });
-        return { user, err };
-    }
-
     async addUser(id, login, password, age) {
-        let result;
-        await bcrypt.hash(password, this.saltRounds).then(async (hash) => {
-            const user = {
-                id,
-                login,
-                password: hash,
-                age,
-                isDeleted: false
-            };
-            await userModal.create(user).then(() => {
-                result = true;
-            }).catch(err => {
-                result = false;
-            });
-        });
-        return result;
+        let hash;
+        try {
+            hash = await bcrypt.hash(password, this.saltRounds);
+        } catch (err) {
+            throw new Error(err);
+        }
+        const user = {
+            id,
+            login,
+            password: hash,
+            age,
+            isDeleted: false
+        };
+        return await userModal.create(user);
     }
 
     async updateUserData(param_id, id, login, password, age) {
@@ -63,19 +37,6 @@ class UserService {
             }).catch(err => {
                 result = false;
             });
-        }).catch(err => {
-            result = false;
-        });
-        return result;
-    }
-
-    async deleteUserData(id) {
-        let result;
-        await userModal.update(
-            { isDeleted: true },
-            { returning: true, where: id }
-        ).then(() => {
-            result = true;
         }).catch(err => {
             result = false;
         });
@@ -136,7 +97,7 @@ class UserService {
             })
         });
         await db.sequelize.transaction(t => {
-            return userGroupModal.bulkCreate(insertData,{transaction:t})
+            return userGroupModal.bulkCreate(insertData, { transaction: t })
         }).then(res => {
             console.log(res);
             result = true;

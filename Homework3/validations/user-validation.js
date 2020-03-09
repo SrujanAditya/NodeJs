@@ -25,7 +25,7 @@ const validateSchema = (schema) => {
 }
 
 const checkAccessPermission = (req, res, next) => {
-    if (!req.session.authId) {
+    if (req.session.authId) {
         res.status(403).json({
             message: "Unauthorised operation"
         });

@@ -1,72 +1,94 @@
 const express = require('express');
 const groupSchema = require('../../schema/group-schema');
 const { validateSchema, checkAccessPermission } = require('../../validations/user-validation');
-const groupService = require('../../services/groups/group-service');
 const groupRouter = express.Router();
+const { groupModal } = require('../../modals/groups/group-modal');
 
 groupRouter.get('/groups', checkAccessPermission, async (req, res) => {
-    const { result, err } = await groupService.getGroupsData();
-    if (result) res.status(200).json(result);
-    if (err) res.status(500).json(err);
+    try {
+        const groups = await groupModal.findAll();
+        res.status(200).json(groups);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
 groupRouter.get('/groups/:id', checkAccessPermission, async (req, res) => {
-    const id = req.params.id;
-    const { group, err } = await groupService.getGroupDataByID(id);
-    if (group) {
-        res.status(200).json(group);
-    } else {
-        res.status(404).json({
-            message: `Group with id ${req.params.id} not found`
-        });
+    try {
+        const group = await groupModal.findByPk(req.params.id);
+        if (group) {
+            res.status(200).json(group);
+        }
+        else {
+            res.status(404).json({
+                message: `Group with id ${req.params.id} not found`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
-    if (err) res.status(500).json(err);
 });
 
 groupRouter.put('/groups/:id', validateSchema(groupSchema), checkAccessPermission, async (req, res) => {
-    const param_id = req.params.id;
     const { id, name, permissions } = req.body;
-    const { result, data, err } = await groupService.updateGroupData(param_id, id, name, permissions);
-    if (result) {
-        if (data[0] !== 0) {
+    try {
+        const result = await groupModal.update(
+            { id, name, permissions },
+            { returning: true, where: { id: req.params.id } }
+        );
+        if (result[0] !== 0) {
             res.status(200).json({
-                message: `Group with id ${param_id} updated successfully`
+                message: `Group with id ${req.params.id} updated successfully`
             });
         } else {
             res.status(404).json({
-                message: `Group with id ${param_id} doesnot exist`
+                message: `Group with id ${req.params.id} doesnot exist`
             });
         }
-    } else {
-        res.status(404).json(err.errors);
+    } catch (err) {
+        res.status(500).json(err);
     }
 });
 
 groupRouter.post('/addGroup', validateSchema(groupSchema), checkAccessPermission, async (req, res) => {
     const { id, name, permissions } = req.body;
-    const result = await groupService.addGroup(id, name, permissions);
-    if (result) {
-        res.status(200).json({
-            message: `Group with id ${id} created successfully`
-        });
-    } else {
-        res.status(422).json({
-            message: `Group with id ${id} already exist`
-        });
+    try {
+        const group = {
+            id,
+            name,
+            permissions
+        };
+        const result = await groupModal.create(group);
+        if (result) {
+            res.status(200).json({
+                message: `Group with id ${id} created successfully`
+            });
+        } else {
+            res.status(422).json({
+                message: `Group with id ${id} already exist`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
 });
 
 groupRouter.delete('/groups/:id', checkAccessPermission, async (req, res) => {
-    const { id } = req.params;
-    const result = await groupService.deleteGroupData(id);
-    if (result) {
-        res.status(200).json({
-            message: `Group with id ${id} deleted successfully`
-        });
-    } else {
-        res.status(404).json({
-            message: `Group with id ${id} not found`
-        });
+    try {
+        const result = await groupModal.destroy(
+            { where: { id: req.params.id } }
+        );
+        if (result) {
+            res.status(200).json({
+                message: `Group with id ${req.params.id} deleted successfully`
+            });
+        } else {
+            res.status(404).json({
+                message: `Group with id ${req.params.id} not found`
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
 });
 
