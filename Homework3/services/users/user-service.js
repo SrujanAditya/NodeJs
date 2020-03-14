@@ -1,6 +1,5 @@
 const { userModal } = require('../../modals/users/user-modal');
 const { userGroupModal } = require('../../modals/users/user-group-modal');
-const op = require('sequelize').Op;
 const db = require('./../../data-access/models/index');
 const bcrypt = require('bcrypt');
 
@@ -37,26 +36,6 @@ class UserService {
             { id, login, password: hash, age },
             { returning: true, where: { id: param_id } }
         );
-    }
-
-    async getUsersByLogin(searchString, limit) {
-        let result, err;
-        await userModal.findAll({
-            where: {
-                login: { [op.like]: `${searchString}%` }
-            },
-            order: [
-                ['login', 'ASC']
-            ],
-            limit: limit
-        }).then(users => {
-            result = users;
-        }).catch(err => {
-            err = {
-                message: `Invalid Query Value`
-            };
-        });
-        return { result, err };
     }
 
     async getUserLoginDetails(login, password) {

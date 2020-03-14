@@ -4,22 +4,27 @@ const userGroupSchema = require('../../schema/user-group-schema');
 const { validateSchema, checkAccessPermission } = require('../../validations/user-validation');
 const userService = require('../../services/users/user-service');
 const { userModal } = require('../../modals/users/user-modal');
+const op = require('sequelize').Op;
 const userRouter = express.Router();
 
 userRouter.post('/login', async (req, res) => {
     const { login, password } = req.body;
-    const result = await userService.getUserLoginDetails(login, password);
-    if (result) {
-        access_token = result;
-        req.session.authId = result;
-        res.status(200).json({
-            message: "Login Successfull",
-            access_token: result
-        });
-    } else {
-        res.status(401).json({
-            message: "Invalid Login id and password entered"
-        });
+    try {
+        const result = await userService.getUserLoginDetails(login, password);
+        if (result) {
+            access_token = result;
+            req.session.authId = result;
+            res.status(200).json({
+                message: "Login Successfull",
+                access_token: result
+            });
+        } else {
+            res.status(401).json({
+                message: "Invalid Login id and password entered"
+            });
+        }
+    } catch (err) {
+        res.status(500).json(err);
     }
 });
 
@@ -108,10 +113,20 @@ userRouter.delete('/users/:id', checkAccessPermission, async (req, res) => {
 });
 
 userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
-    const { search, limit } = req.query;
-    const { result, err } = await userService.getUsersByLogin(search, limit);
-    if (result) res.status(200).json(result);
-    if (err) res.status(500).json(err);
+    try {
+        const result = await serModal.findAll({
+            where: {
+                login: { [op.like]: `${req.query.search}%` }
+            },
+            order: [
+                ['login', 'ASC']
+            ],
+            limit: req.query.limit
+        });
+        res.status(200).json(result);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
 userRouter.post('/addUserToGroup', validateSchema(userGroupSchema), checkAccessPermission, async (req, res) => {
