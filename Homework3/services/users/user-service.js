@@ -39,27 +39,14 @@ class UserService {
     }
 
     async getUserLoginDetails(login, password) {
-        let result;
-        await userModal.findOne({
+        const user = await userModal.findOne({
             where: { login: login }
-        }).then(async (user) => {
-            if (user) {
-                await bcrypt.compare(password, user.password).then((data) => {
-                    if (data) {
-                        result = user.password;
-                    } else {
-                        result = false;
-                    }
-                }).catch(err => {
-                    result = false;
-                });
-            } else {
-                result = false;
-            }
-        }).catch(err => {
-            result = false;
         });
-        return result;
+        if (user) {
+            return await bcrypt.compare(password, user.password);
+        } else {
+            throw new Error("Invalid Login id and password entered");
+        }
     }
 
     async addUsersToGroup(groupId, userIds) {
