@@ -12,7 +12,6 @@ userRouter.post('/login', async (req, res) => {
     try {
         const result = await userService.getUserLoginDetails(login, password);
         if (result) {
-            access_token = result;
             req.session.authId = result;
             res.status(200).json({
                 message: "Login Successfull",
