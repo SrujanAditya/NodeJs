@@ -32,8 +32,8 @@ app.use('/api', groupRoutes);
 
 
 app.use(function (err, req, res, next) {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
+    console.error(err.stack);
+    res.status(500).send('Internal Server Error');
 });
 
 app.listen(PORT, () => console.log(`Server is listening on port ${PORT}!`));
