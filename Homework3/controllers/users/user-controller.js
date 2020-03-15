@@ -114,7 +114,7 @@ userRouter.delete('/users/:id', checkAccessPermission, async (req, res) => {
 
 userRouter.get('/autoSuggest', checkAccessPermission, async (req, res) => {
     try {
-        const result = await serModal.findAll({
+        const result = await userModal.findAll({
             where: {
                 login: { [op.like]: `${req.query.search}%` }
             },
