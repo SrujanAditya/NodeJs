@@ -4,6 +4,7 @@ const groupRoutes = require('./controllers/groups/group-controller');
 const PORT = process.env.port || 3000;
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const logger = require('./loggers/winston-logger');
 
 const app = express();
 
@@ -22,8 +23,11 @@ app.use(session({
 }));
 
 app.use((req, res, next) => {
-    console.log(`Time: ${Date.now()}`);
-    console.log(`Request url: ${req.originalUrl}`);
+    logger.info(`Time: ${Date.now()}`);
+    logger.info(`Request url: ${req.originalUrl}`);
+    logger.info(`Request Body: ${JSON.stringify(req.body)}`);
+    logger.info(`Request params: ${JSON.stringify(req.params)}`);
+    logger.info(`Request query: ${JSON.stringify(req.query)}`);
     next();
 });
 
@@ -32,8 +36,18 @@ app.use('/api', groupRoutes);
 
 
 app.use(function (err, req, res, next) {
-    console.error(err.stack);
+    logger.error(err.stack);
     res.status(500).send('Internal Server Error');
 });
 
-app.listen(PORT, () => console.log(`Server is listening on port ${PORT}!`));
+process.on('unhandledRejection', (reason, p) => {
+    logger.error(reason, 'Unhandled Rejection at Promise', p);
+    process.exit(1);
+});
+
+process.on('uncaughtException', err => {
+    logger.error(err, 'Uncaught Exception thrown');
+    process.exit(1);
+});
+
+app.listen(PORT, () => logger.info(`Server is listening on port ${PORT}!`));

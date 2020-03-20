@@ -1,0 +1,5 @@
+info: Server is listening on port 3000! {"timestamp":"2020-03-20T18:14:48.882Z"}
+error: post:/addUser, Error: SequelizeUniqueConstraintError: Validation error {"timestamp":"2020-03-20T18:42:42.121Z"}
+error: post:/addUser, Error: SequelizeUniqueConstraintError: Validation error {"timestamp":"2020-03-20T18:44:39.779Z"}
+error: ReferenceError: logger is not defined {"timestamp":"2020-03-20T18:47:07.166Z"}
+error: ReferenceError: logger is not defined {"timestamp":"2020-03-20T18:47:19.749Z"}
