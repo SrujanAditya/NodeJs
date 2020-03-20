@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const errorResponse = (schemaErrors) => {
     let errors = schemaErrors.map((error) => {
         return {
@@ -25,12 +27,23 @@ const validateSchema = (schema) => {
 }
 
 const checkAccessPermission = (req, res, next) => {
-    if (req.session.authId) {
-        res.status(403).json({
-            message: "Unauthorised operation"
-        });
+    let token = req.headers['x-access-token'];
+
+    if(token) {
+        jwt.verify(token,'secret',(err,decoded)=>{
+            if(err){
+                res.status(401).json({
+                    message:err
+                })
+            } else {
+                next();
+            }
+        })
+
     } else {
-        next();
+        res.status(403).send({
+            message: 'Forbidden Error'
+        });
     }
 }
 

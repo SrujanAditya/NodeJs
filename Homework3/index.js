@@ -3,24 +3,26 @@ const userRoutes = require('./controllers/users/user-controller');
 const groupRoutes = require('./controllers/groups/group-controller');
 const PORT = process.env.port || 3000;
 const bodyParser = require('body-parser');
-const session = require('express-session');
+// const session = require('express-session');
 const logger = require('./loggers/winston-logger');
+var cors = require('cors');
 
 const app = express();
+app.use(cors());
 
 app.use(bodyParser.json());
-app.use(session({
-    name: 'user',
-    resave: false,
-    saveUninitialized: false,
-    secret: 'ssh!quiet,it\'asecret!',
-    authId: null,
-    cookie: {
-        maxAge: 1000 * 60 * 60,
-        secure: true,
-        sameSite: true
-    }
-}));
+// app.use(session({
+//     name: 'user',
+//     resave: false,
+//     saveUninitialized: false,
+//     secret: 'ssh!quiet,it\'asecret!',
+//     authId: null,
+//     cookie: {
+//         maxAge: 1000 * 60 * 60,
+//         secure: true,
+//         sameSite: true
+//     }
+// }));
 
 app.use((req, res, next) => {
     logger.info(`Time: ${Date.now()}`);

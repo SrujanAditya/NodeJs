@@ -3,6 +3,7 @@ const { userGroupModal } = require('../../modals/users/user-group-modal');
 const db = require('./../../data-access/models/index');
 const bcrypt = require('bcrypt');
 const logger = require('./../../loggers/winston-logger');
+const jwt = require('jsonwebtoken');
 
 class UserService {
     constructor() {
@@ -68,6 +69,12 @@ class UserService {
         return await db.sequelize.transaction(t => {
             return userGroupModal.bulkCreate(insertData, { transaction: t })
         });
+    }
+
+    async loginJWTtoken(username, password) {
+        let payload = { username, password };
+        let token = jwt.sign(payload, 'secret', { expiresIn: 1000 });
+        return token;
     }
 }
 
