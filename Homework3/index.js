@@ -41,12 +41,12 @@ app.use(function (err, req, res, next) {
 });
 
 process.on('unhandledRejection', (reason, p) => {
-    logger.error(reason, 'Unhandled Rejection at Promise', p);
+    logger.error(`${reason}, 'Unhandled Rejection at Promise', ${p}`);
     process.exit(1);
 });
 
 process.on('uncaughtException', err => {
-    logger.error(err, 'Uncaught Exception thrown');
+    logger.error(`${err}, 'Uncaught Exception thrown'`);
     process.exit(1);
 });
 
