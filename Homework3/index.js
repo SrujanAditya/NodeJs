@@ -1,10 +1,12 @@
 const express = require('express');
 const userRoutes = require('./controllers/users/user-controller');
 const groupRoutes = require('./controllers/groups/group-controller');
-const PORT = process.env.port || 3000;
 const bodyParser = require('body-parser');
 // const session = require('express-session');
 const logger = require('./loggers/winston-logger');
+require("dotenv").config();
+const PORT = process.env.PORT;
+
 var cors = require('cors');
 
 const app = express();

@@ -29,11 +29,11 @@ const validateSchema = (schema) => {
 const checkAccessPermission = (req, res, next) => {
     let token = req.headers['x-access-token'];
 
-    if(token) {
-        jwt.verify(token,'secret',(err,decoded)=>{
-            if(err){
+    if (token) {
+        jwt.verify(token, 'secret', (err, decoded) => {
+            if (err) {
                 res.status(401).json({
-                    message:err
+                    message: err
                 })
             } else {
                 next();
