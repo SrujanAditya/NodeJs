@@ -55,3 +55,5 @@ process.on('uncaughtException', err => {
 });
 
 app.listen(PORT, () => logger.info(`Server is listening on port ${PORT}!`));
+
+module.exports = app;
