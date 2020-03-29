@@ -39,6 +39,41 @@ describe('USER Controller testing Endpoints', () => {
 			});
 	});
 
+	it('should return a valid JWT token', async (done) => {
+		userService.getUserLoginDetails.mockReturnValue(true);
+		const res = await request.post('/api/login')
+			.send({
+				login: 'admin@gmail.com',
+				password: 'password',
+			});
+		expect(res.statusCode).toEqual(200);
+		done();
+	});
+
+	it('should return invalid credentials error', async (done) => {
+		userService.getUserLoginDetails.mockReturnValue(false);
+		const res = await request.post('/api/login')
+			.send({
+				login: 'admin@gmail.com',
+				password: 'password',
+			});
+		expect(res.statusCode).toEqual(401);
+		done();
+	});
+
+	it('should return invalid credentials error, throw an error', async (done) => {
+		userService.getUserLoginDetails.mockImplementation(()=>{
+			throw new Error();
+		});
+		const res = await request.post('/api/login')
+			.send({
+				login: 'admin@gmail.com',
+				password: 'password',
+			});
+		expect(res.statusCode).toEqual(500);
+		done();
+	});
+
 	it('should return Forbidden access ', async (done) => {
 		const res = await request.get('/api/users');
 		expect(res.statusCode).toEqual(403);
@@ -58,6 +93,15 @@ describe('USER Controller testing Endpoints', () => {
 		expect(res.body).toEqual(users);
 		done();
 	});
+	it('should return User details, throws an error ', async (done) => {
+		userModal.findAll = jest.fn();
+		userModal.findAll.mockImplementation(() => {
+			throw new Error();
+		});
+		const res = await request.get('/api/users').set('x-access-token', `${token}`);
+		expect(res.statusCode).toEqual(500);
+		done();
+	});
 	it('should return User details by ID when user exist', async (done) => {
 		userModal.findByPk = jest.fn();
 		userModal.findByPk.mockReturnValue(users[0]);
@@ -71,6 +115,15 @@ describe('USER Controller testing Endpoints', () => {
 		userModal.findByPk.mockReturnValue(null);
 		const res = await request.get('/api/users/:003').set('x-access-token', `${token}`);
 		expect(res.statusCode).toEqual(404);
+		done();
+	});
+	it('should return User details by ID , throws an error', async (done) => {
+		userModal.findByPk = jest.fn();
+		userModal.findByPk.mockImplementation(() => {
+			throw new Error();
+		});
+		const res = await request.get('/api/users/:003').set('x-access-token', `${token}`);
+		expect(res.statusCode).toEqual(500);
 		done();
 	});
 	it('should update user details', async (done) => {
@@ -99,6 +152,22 @@ describe('USER Controller testing Endpoints', () => {
 				"age": 22
 			});
 		expect(res.statusCode).toEqual(404);
+		done();
+	});
+	it('should update user details but throws an error', async (done) => {
+		userService.updateUserData = jest.fn();
+		userService.updateUserData.mockImplementation(() => {
+			throw new Error();
+		});
+		const res = await request.put('/api/users/:003')
+			.set('x-access-token', `${token}`)
+			.send({
+				"id": "006",
+				"login": "admin4@gmail.com",
+				"password": "password",
+				"age": 22
+			});
+		expect(res.statusCode).toEqual(500);
 		done();
 	});
 	it('should add new user', async (done) => {
@@ -143,6 +212,86 @@ describe('USER Controller testing Endpoints', () => {
 				"age": 22
 			});
 		expect(res.statusCode).toEqual(422);
+		done();
+	});
+	it('should delete a user', async (done) => {
+		userModal.update = jest.fn();
+		userModal.update.mockReturnValue(true);
+		const res = await request.delete('/api/users/:001')
+			.set('x-access-token', `${token}`);;
+		expect(res.statusCode).toEqual(200);
+		done();
+	});
+	it('should delete a user but id doesnot exist', async (done) => {
+		userModal.update = jest.fn();
+		userModal.update.mockReturnValue(false);
+		const res = await request.delete('/api/users/:008')
+			.set('x-access-token', `${token}`);;
+		expect(res.statusCode).toEqual(404);
+		done();
+	});
+	it('should delete a user but throws error', async (done) => {
+		userModal.update = jest.fn();
+		userModal.update.mockImplementation(() => {
+			throw new Error();
+		});
+		const res = await request.delete('/api/users/:008')
+			.set('x-access-token', `${token}`);;
+		expect(res.statusCode).toEqual(500);
+		done();
+	});
+	it('should return autosuggest details', async (done) => {
+		userModal.findAll = jest.fn();
+		userModal.findAll.mockReturnValue(true);
+		const res = await request.get('/api/autoSuggest').set('x-access-token', `${token}`);
+		expect(res.statusCode).toEqual(200);
+		done();
+	});
+	it('should return autosuggest details, throws error', async (done) => {
+		userModal.findAll = jest.fn();
+		userModal.findAll.mockImplementation(() => {
+			throw new Error();
+		});
+		const res = await request.get('/api/autoSuggest').set('x-access-token', `${token}`);
+		expect(res.statusCode).toEqual(500);
+		done();
+	});
+	it('should add users to group', async (done) => {
+		userService.addUsersToGroup = jest.fn();
+		userService.addUsersToGroup.mockReturnValue(true);
+		const res = await request.post('/api/addUserToGroup')
+			.set('x-access-token', `${token}`)
+			.send({
+				"groupId": "001",
+				"userIds": ["002", "003"]
+			});
+		expect(res.statusCode).toEqual(200);
+		done();
+	});
+	it('should add users to group, failed to add', async (done) => {
+		userService.addUsersToGroup = jest.fn();
+		userService.addUsersToGroup.mockReturnValue(false);
+		const res = await request.post('/api/addUserToGroup')
+			.set('x-access-token', `${token}`)
+			.send({
+				"groupId": "001",
+				"userIds": ["002", "003"]
+			});
+		expect(res.statusCode).toEqual(409);
+		done();
+	});
+	it('should add users to group, throws error', async (done) => {
+		userService.addUsersToGroup = jest.fn();
+		userService.addUsersToGroup.mockImplementation(() => {
+			throw new Error();
+		});
+		const res = await request.post('/api/addUserToGroup')
+			.set('x-access-token', `${token}`)
+			.send({
+				"groupId": "001",
+				"userIds": ["002", "003"]
+			});
+		expect(res.statusCode).toEqual(500);
 		done();
 	});
 });

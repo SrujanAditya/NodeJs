@@ -15,8 +15,8 @@ userRouter.post('/login', async (req, res) => {
         logger.info(`Method to call : userService.getUserLoginDetails, Arguments: login and password`);
         const result = await userService.getUserLoginDetails(login, password);
         if (result) {
-        logger.info(`Method to call : userService.loginJWTtoken, Arguments: login and password`);
-        const token = await userService.loginJWTtoken(login, password);
+            logger.info(`Method to call : userService.loginJWTtoken, Arguments: login and password`);
+            const token = await userService.loginJWTtoken(login, password);
             res.status(200).json({
                 message: "Login Successfull",
                 access_token: token
