@@ -1,5 +1,4 @@
 const request = require('supertest');
-// const request = supertest(app);
 const { userModal } = require('./../modals/users/user-modal');
 const userService = require('./../services/users/user-service');
 
