@@ -7,10 +7,52 @@ const logger = require('./loggers/winston-logger');
 require("dotenv").config();
 const PORT = process.env.PORT;
 
+const getActualRequestDurationInMilliseconds = start => {
+    const NS_PER_SEC = 1e9; // convert to nanoseconds
+    const NS_TO_MS = 1e6; // convert to milliseconds
+    const diff = process.hrtime(start);
+    return (diff[0] * NS_PER_SEC + diff[1]) / NS_TO_MS;
+};
+
+let demoLogger = (req, res, next) => {
+    let current_datetime = new Date();
+    let formatted_date =
+      current_datetime.getFullYear() +
+      "-" +
+      (current_datetime.getMonth() + 1) +
+      "-" +
+      current_datetime.getDate() +
+      " " +
+      current_datetime.getHours() +
+      ":" +
+      current_datetime.getMinutes() +
+      ":" +
+      current_datetime.getSeconds();
+    let method = req.method;
+    let url = req.url;
+    let status = res.statusCode;
+    const start = process.hrtime();
+    const durationInMilliseconds = getActualRequestDurationInMilliseconds(start);
+    let log = `[${formatted_date}] ${method}:${url} ${status} ${durationInMilliseconds.toLocaleString()} ms`;
+    logger.info(log);
+    console.log(log);
+    next();
+  };
+
 var cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+var whitelist = ['http://localhost:4200', 'http://example2.com']
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
 
 app.use(bodyParser.json());
 // app.use(session({
@@ -26,6 +68,8 @@ app.use(bodyParser.json());
 //     }
 // }));
 
+app.use(demoLogger);
+
 app.use((req, res, next) => {
     logger.info(`Time: ${Date.now()}`);
     logger.info(`Request url: ${req.originalUrl}`);
@@ -35,8 +79,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/api', userRoutes);
-app.use('/api', groupRoutes);
+app.use('/api',cors(corsOptions), userRoutes);
+app.use('/api',cors(corsOptions), groupRoutes);
 
 
 app.use(function (err, req, res, next) {
